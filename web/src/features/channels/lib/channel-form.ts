@@ -246,6 +246,9 @@ export const channelFormSchema = z
       .optional()
       .refine(isOptionalJsonObject, ERROR_MESSAGES.INVALID_JSON),
     advanced_custom: z.string().optional(),
+    gpt_image_2_model_1k: z.string().optional(),
+    gpt_image_2_model_2k: z.string().optional(),
+    gpt_image_2_model_4k: z.string().optional(),
     other: z.string().optional(),
     // Multi-key options (not sent to backend directly)
     multi_key_mode: z.enum(['single', 'batch', 'multi_to_single']).optional(),
@@ -454,6 +457,9 @@ export const CHANNEL_FORM_DEFAULT_VALUES: ChannelFormValues = {
   upstream_model_update_auto_sync_enabled: false,
   upstream_model_update_ignored_models: '',
   advanced_custom: '',
+  gpt_image_2_model_1k: '',
+  gpt_image_2_model_2k: '',
+  gpt_image_2_model_4k: '',
 }
 
 // ============================================================================
@@ -518,6 +524,9 @@ export function transformChannelToFormDefaults(
   let upstreamModelUpdateAutoSyncEnabled = false
   let upstreamModelUpdateIgnoredModels = ''
   let advancedCustom = ''
+  let gptImage2Model1K = ''
+  let gptImage2Model2K = ''
+  let gptImage2Model4K = ''
 
   if (channel.settings) {
     try {
@@ -546,6 +555,9 @@ export function transformChannelToFormDefaults(
       if (parsed.advanced_custom) {
         advancedCustom = stringifyAdvancedCustomConfig(parsed.advanced_custom)
       }
+      gptImage2Model1K = parsed.gpt_image_2_size_models?.['1k'] || ''
+      gptImage2Model2K = parsed.gpt_image_2_size_models?.['2k'] || ''
+      gptImage2Model4K = parsed.gpt_image_2_size_models?.['4k'] || ''
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to parse channel settings:', error)
@@ -597,6 +609,9 @@ export function transformChannelToFormDefaults(
     upstream_model_update_auto_sync_enabled: upstreamModelUpdateAutoSyncEnabled,
     upstream_model_update_ignored_models: upstreamModelUpdateIgnoredModels,
     advanced_custom: advancedCustom,
+    gpt_image_2_model_1k: gptImage2Model1K,
+    gpt_image_2_model_2k: gptImage2Model2K,
+    gpt_image_2_model_4k: gptImage2Model4K,
   }
 }
 
@@ -761,6 +776,22 @@ function buildSettingsJSON(formData: ChannelFormValues): string {
     }
   } else if ('advanced_custom' in settingsObj) {
     delete settingsObj.advanced_custom
+  }
+
+  const gptImage2SizeModels: Record<string, string> = {}
+  const gptImage2Model1K = formData.gpt_image_2_model_1k?.trim()
+  const gptImage2Model2K = formData.gpt_image_2_model_2k?.trim()
+  const gptImage2Model4K = formData.gpt_image_2_model_4k?.trim()
+  if (gptImage2Model1K) gptImage2SizeModels['1k'] = gptImage2Model1K
+  if (gptImage2Model2K) gptImage2SizeModels['2k'] = gptImage2Model2K
+  if (gptImage2Model4K) gptImage2SizeModels['4k'] = gptImage2Model4K
+  if (
+    parseModels(formData.models).includes('gpt-image-2') &&
+    Object.keys(gptImage2SizeModels).length > 0
+  ) {
+    settingsObj.gpt_image_2_size_models = gptImage2SizeModels
+  } else if ('gpt_image_2_size_models' in settingsObj) {
+    delete settingsObj.gpt_image_2_size_models
   }
 
   return JSON.stringify(settingsObj)

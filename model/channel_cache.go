@@ -111,22 +111,22 @@ func SyncChannelCache(frequency int) {
 	}
 }
 
-func GetRandomSatisfiedChannel(group string, model string, retry int, requestPath string) (*Channel, error) {
+func GetRandomSatisfiedChannel(group string, model string, retry int, requestPath string, imageSizeTier string) (*Channel, error) {
 	// if memory cache is disabled, get channel directly from database
 	if !common.MemoryCacheEnabled {
-		return GetChannel(group, model, retry, requestPath)
+		return GetChannel(group, model, retry, requestPath, imageSizeTier)
 	}
 
 	channelSyncLock.RLock()
 	defer channelSyncLock.RUnlock()
 
 	// First, try to find channels with the exact model name.
-	channels := filterChannelsByRequestPathAndModel(group2model2channels[group][model], requestPath, model)
+	channels := filterChannelsByRequestPathAndModel(group2model2channels[group][model], requestPath, model, imageSizeTier)
 
 	// If no channels found, try to find channels with the normalized model name.
 	if len(channels) == 0 {
 		normalizedModel := ratio_setting.FormatMatchingModelName(model)
-		channels = filterChannelsByRequestPathAndModel(group2model2channels[group][normalizedModel], requestPath, model)
+		channels = filterChannelsByRequestPathAndModel(group2model2channels[group][normalizedModel], requestPath, model, imageSizeTier)
 	}
 
 	if len(channels) == 0 {
@@ -213,8 +213,8 @@ func GetRandomSatisfiedChannel(group string, model string, retry int, requestPat
 // only when one of their configured routes matches requestPath and model. All
 // other channel types always pass. When requestPath is empty, filtering is skipped.
 // Caller must hold channelSyncLock (read lock). The cached slice is never mutated.
-func filterChannelsByRequestPathAndModel(channels []int, requestPath string, model string) []int {
-	if requestPath == "" || len(channels) == 0 {
+func filterChannelsByRequestPathAndModel(channels []int, requestPath string, model string, imageSizeTier string) []int {
+	if len(channels) == 0 {
 		return channels
 	}
 	filtered := make([]int, 0, len(channels))
@@ -222,6 +222,13 @@ func filterChannelsByRequestPathAndModel(channels []int, requestPath string, mod
 		channel, ok := channelsIDM[channelId]
 		if !ok {
 			// keep it so the downstream consistency error is raised as before
+			filtered = append(filtered, channelId)
+			continue
+		}
+		if model == dto.GPTImage2Model && imageSizeTier != "" && channel.GetGPTImage2UpstreamModel(imageSizeTier) == "" {
+			continue
+		}
+		if requestPath == "" {
 			filtered = append(filtered, channelId)
 			continue
 		}

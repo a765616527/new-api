@@ -1,25 +1,35 @@
 package helper
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/QuantumNous/new-api/relay/common"
+	rootcommon "github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
+	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/gin-gonic/gin"
 )
 
-func ModelMappedHelper(c *gin.Context, info *common.RelayInfo, request dto.Request) error {
+func ModelMappedHelper(c *gin.Context, info *relaycommon.RelayInfo, request dto.Request) error {
 	if info.ChannelMeta == nil {
-		info.ChannelMeta = &common.ChannelMeta{}
+		info.ChannelMeta = &relaycommon.ChannelMeta{}
+	}
+
+	if sizeMappedModel := rootcommon.GetContextKeyString(c, constant.ContextKeyChannelSizeMappedModel); sizeMappedModel != "" {
+		info.UpstreamModelName = sizeMappedModel
+		info.IsModelMapped = sizeMappedModel != info.OriginModelName
+		if request != nil {
+			request.SetModelName(sizeMappedModel)
+		}
+		return nil
 	}
 
 	// map model name
 	modelMapping := c.GetString("model_mapping")
 	if modelMapping != "" && modelMapping != "{}" {
 		modelMap := make(map[string]string)
-		err := json.Unmarshal([]byte(modelMapping), &modelMap)
+		err := rootcommon.Unmarshal([]byte(modelMapping), &modelMap)
 		if err != nil {
 			return fmt.Errorf("unmarshal_model_mapping_failed")
 		}

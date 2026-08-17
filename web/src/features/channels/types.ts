@@ -109,6 +109,13 @@ export interface ChannelOtherSettings {
   upstream_model_update_last_check_time?: number
   upstream_model_update_last_detected_models?: string[]
   advanced_custom?: AdvancedCustomConfig
+  gpt_image_2_size_models?: GPTImage2SizeModels
+}
+
+export interface GPTImage2SizeModels {
+  '1k'?: string
+  '2k'?: string
+  '4k'?: string
 }
 
 export interface AdvancedCustomConfig {

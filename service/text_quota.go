@@ -520,6 +520,7 @@ func PostTextConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, us
 	if tieredBillingApplied {
 		InjectTieredBillingInfo(other, relayInfo, tieredResult)
 	}
+	appendGPTImage2RequestInfo(other, relayInfo)
 
 	attachQuotaSaturation(ctx, relayInfo, other)
 

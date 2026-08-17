@@ -66,11 +66,13 @@ import { cn } from '@/lib/utils'
 import {
   EMPTY_LANE_ENABLED,
   EMPTY_LANE_PRICES,
+  GPT_IMAGE_2_MODEL,
   buildPreviewRows,
   createInitialLaneState,
   createModelPricingSchema,
   hasValue,
   laneConfigs,
+  needsGPTImage2FallbackPrice,
   numericDraftRegex,
   ratioFieldByLane,
   toNumberOrNull,
@@ -170,6 +172,9 @@ export const ModelPricingEditorPanel = forwardRef<
       imageRatio: '',
       audioRatio: '',
       audioCompletionRatio: '',
+      gptImage2Price1K: '',
+      gptImage2Price2K: '',
+      gptImage2Price4K: '',
     },
   })
 
@@ -187,14 +192,22 @@ export const ModelPricingEditorPanel = forwardRef<
         imageRatio: editData.imageRatio || '',
         audioRatio: editData.audioRatio || '',
         audioCompletionRatio: editData.audioCompletionRatio || '',
+        gptImage2Price1K: editData.gptImage2Price1K || '',
+        gptImage2Price2K: editData.gptImage2Price2K || '',
+        gptImage2Price4K: editData.gptImage2Price4K || '',
       })
-      setPricingMode(
-        editData.billingMode === 'tiered_expr'
-          ? 'tiered_expr'
-          : editData.price
-            ? 'per-request'
-            : 'per-token'
-      )
+      let nextPricingMode: PricingMode = 'per-token'
+      if (editData.billingMode === 'tiered_expr') {
+        nextPricingMode = 'tiered_expr'
+      } else if (
+        editData.price ||
+        editData.gptImage2Price1K ||
+        editData.gptImage2Price2K ||
+        editData.gptImage2Price4K
+      ) {
+        nextPricingMode = 'per-request'
+      }
+      setPricingMode(nextPricingMode)
       setBillingExpr(editData.billingExpr || '')
       setRequestRuleExpr(editData.requestRuleExpr || '')
     } else {
@@ -208,6 +221,9 @@ export const ModelPricingEditorPanel = forwardRef<
         imageRatio: '',
         audioRatio: '',
         audioCompletionRatio: '',
+        gptImage2Price1K: '',
+        gptImage2Price2K: '',
+        gptImage2Price4K: '',
       })
       setPricingMode('per-token')
       setBillingExpr('')
@@ -412,6 +428,18 @@ export const ModelPricingEditorPanel = forwardRef<
 
   const validatePricingValues = useCallback(() => {
     if (
+      pricingMode === 'per-request' &&
+      needsGPTImage2FallbackPrice(form.getValues())
+    ) {
+      form.setError('price', {
+        message: t(
+          'A fixed fallback price is required when any resolution tier is left empty.'
+        ),
+      })
+      return false
+    }
+
+    if (
       pricingMode === 'per-token' &&
       toNumberOrNull(promptPrice) === null &&
       laneConfigs.some(
@@ -451,6 +479,9 @@ export const ModelPricingEditorPanel = forwardRef<
         imageRatio: values.imageRatio || '',
         audioRatio: values.audioRatio || '',
         audioCompletionRatio: values.audioCompletionRatio || '',
+        gptImage2Price1K: values.gptImage2Price1K || '',
+        gptImage2Price2K: values.gptImage2Price2K || '',
+        gptImage2Price4K: values.gptImage2Price4K || '',
       }
 
       if (pricingMode === 'tiered_expr') {
@@ -636,6 +667,58 @@ export const ModelPricingEditorPanel = forwardRef<
                           </FormItem>
                         )}
                       />
+                      {watchedValues.name === GPT_IMAGE_2_MODEL && (
+                        <Field>
+                          <FieldLabel>
+                            {t('GPT Image 2 resolution prices')}
+                          </FieldLabel>
+                          <FieldDescription>
+                            {t(
+                              'USD price per generated image. Empty tiers use the fixed fallback price above.'
+                            )}
+                          </FieldDescription>
+                          <div className='grid gap-3 sm:grid-cols-3'>
+                            {(
+                              [
+                                ['gptImage2Price1K', '1K price'],
+                                ['gptImage2Price2K', '2K price'],
+                                ['gptImage2Price4K', '4K price'],
+                              ] as const
+                            ).map(([name, label]) => (
+                              <FormField
+                                key={name}
+                                control={form.control}
+                                name={name}
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>{t(label)}</FormLabel>
+                                    <FormControl>
+                                      <InputGroup>
+                                        <InputGroupAddon>$</InputGroupAddon>
+                                        <InputGroupInput
+                                          inputMode='decimal'
+                                          placeholder='0.01'
+                                          {...field}
+                                          onChange={(event) => {
+                                            const value = event.target.value
+                                            if (numericDraftRegex.test(value)) {
+                                              field.onChange(value)
+                                            }
+                                          }}
+                                        />
+                                        <InputGroupAddon align='inline-end'>
+                                          {t('per image')}
+                                        </InputGroupAddon>
+                                      </InputGroup>
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            ))}
+                          </div>
+                        </Field>
+                      )}
                     </FieldGroup>
                   </TabsContent>
 

@@ -470,6 +470,51 @@ function TokenBreakdown(props: { log: UsageLog; other: LogOtherData }) {
   )
 }
 
+function ImageRequestBreakdown(props: { other: LogOtherData }) {
+  const { t } = useTranslation()
+  const { other } = props
+  const rows: Array<{ label: string; value: string }> = []
+
+  if (other.image_size) {
+    rows.push({ label: t('Requested Size'), value: other.image_size })
+  }
+  if (other.image_size_tier) {
+    rows.push({
+      label: t('Resolution Tier'),
+      value: other.image_size_tier,
+    })
+  }
+  if (other.image_quality) {
+    rows.push({ label: t('Requested Quality'), value: other.image_quality })
+  }
+  if (other.image_count != null) {
+    rows.push({
+      label: t('Image Count'),
+      value: other.image_count.toLocaleString(),
+    })
+  }
+  if (other.image_unit_price != null) {
+    rows.push({
+      label: t('Unit Price'),
+      value: `${formatBillingCurrencyFromUSD(other.image_unit_price, {
+        digitsLarge: 4,
+        digitsSmall: 6,
+        abbreviate: false,
+      })} ${t('per image')}`,
+    })
+  }
+
+  if (rows.length === 0) return null
+
+  return (
+    <DetailSection label={t('Image Request')}>
+      {rows.map((row) => (
+        <DetailRow key={row.label} label={row.label} value={row.value} mono />
+      ))}
+    </DetailSection>
+  )
+}
+
 interface DetailsDialogProps {
   log: UsageLog
   isAdmin: boolean
@@ -1055,6 +1100,10 @@ export function DetailsDialog(props: DetailsDialogProps) {
               mono
             />
           </DetailSection>
+        )}
+
+        {isDisplayableType(props.log.type) && other && (
+          <ImageRequestBreakdown other={other} />
         )}
 
         {/* Token breakdown (for consume/error types with token data) */}

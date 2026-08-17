@@ -177,6 +177,11 @@ export interface LogOtherData {
   model_ratio?: number
   completion_ratio?: number
   model_price?: number
+  image_size?: string
+  image_size_tier?: string
+  image_quality?: string
+  image_count?: number
+  image_unit_price?: number
   group_ratio?: number
   user_group_ratio?: number
   cache_ratio?: number

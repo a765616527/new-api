@@ -69,6 +69,39 @@ func appendRequestPath(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, other
 	}
 }
 
+func appendGPTImage2RequestInfo(other map[string]interface{}, relayInfo *relaycommon.RelayInfo) {
+	if other == nil || relayInfo == nil || relayInfo.OriginModelName != dto.GPTImage2Model {
+		return
+	}
+	request, ok := relayInfo.Request.(*dto.ImageRequest)
+	if !ok || request == nil {
+		return
+	}
+
+	size := strings.TrimSpace(request.Size)
+	if size == "" {
+		size = "auto"
+	}
+	quality := strings.TrimSpace(request.Quality)
+	if quality == "" {
+		quality = "auto"
+	}
+	count := uint(1)
+	if request.N != nil && *request.N > 0 {
+		count = *request.N
+	}
+
+	other["image_size"] = size
+	other["image_quality"] = quality
+	other["image_count"] = count
+	if tier, err := dto.GPTImage2SizeTier(request.Size); err == nil {
+		other["image_size_tier"] = strings.ToUpper(tier)
+		if relayInfo.PriceData.UsePrice {
+			other["image_unit_price"] = relayInfo.PriceData.ModelPrice
+		}
+	}
+}
+
 func GenerateTextOtherInfo(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, modelRatio, groupRatio, completionRatio float64,
 	cacheTokens int, cacheRatio float64, modelPrice float64, userGroupRatio float64) map[string]interface{} {
 	other := make(map[string]interface{})

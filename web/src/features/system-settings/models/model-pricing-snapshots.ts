@@ -19,6 +19,10 @@ For commercial licensing, please contact support@quantumnous.com
 import { splitBillingExprAndRequestRules } from '@/features/pricing/lib/billing-expr'
 
 import { safeJsonParse } from '../utils/json-parser'
+import {
+  GPT_IMAGE_2_MODEL,
+  GPT_IMAGE_2_TIER_PRICE_KEYS,
+} from './model-pricing-core'
 import { formatPricingNumber } from './pricing-format'
 
 export type ModelPricingSnapshotInput = {
@@ -47,6 +51,9 @@ export type ModelPricingSnapshot = {
   billingMode?: string
   billingExpr?: string
   requestRuleExpr?: string
+  gptImage2Price1K?: string
+  gptImage2Price2K?: string
+  gptImage2Price4K?: string
   hasConflict: boolean
 }
 
@@ -65,7 +72,10 @@ export const isBasePricingUnset = (snapshot?: ModelPricingSnapshot) =>
   !snapshot ||
   (snapshot.billingMode !== 'tiered_expr' &&
     !hasPricingValue(snapshot.price) &&
-    !hasPricingValue(snapshot.ratio))
+    !hasPricingValue(snapshot.ratio) &&
+    !hasPricingValue(snapshot.gptImage2Price1K) &&
+    !hasPricingValue(snapshot.gptImage2Price2K) &&
+    !hasPricingValue(snapshot.gptImage2Price4K))
 
 const toNumberOrNull = (value?: string) => {
   if (!hasPricingValue(value)) return null
@@ -113,6 +123,18 @@ export const getPriceSummary = (
     return getExpressionSummary(row, t)
   }
   if (row.billingMode === 'per-request') {
+    if (
+      row.name === GPT_IMAGE_2_MODEL &&
+      (row.gptImage2Price1K || row.gptImage2Price2K || row.gptImage2Price4K)
+    ) {
+      return [
+        row.gptImage2Price1K && `1K $${row.gptImage2Price1K}`,
+        row.gptImage2Price2K && `2K $${row.gptImage2Price2K}`,
+        row.gptImage2Price4K && `4K $${row.gptImage2Price4K}`,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    }
     return row.price ? `$${row.price} / ${t('request')}` : t('Unset price')
   }
 
@@ -143,6 +165,12 @@ export const getPriceDetail = (
       : t('Expression based')
   }
   if (row.billingMode === 'per-request') {
+    if (
+      row.name === GPT_IMAGE_2_MODEL &&
+      (row.gptImage2Price1K || row.gptImage2Price2K || row.gptImage2Price4K)
+    ) {
+      return t('Resolution-based image price')
+    }
     return t('Fixed request price')
   }
 
@@ -229,7 +257,20 @@ export const buildModelSnapshots = ({
     ...Object.keys(billingExprMap),
   ])
 
-  return Array.from(modelNames).map((name) => {
+  const gptImage2Price1K =
+    priceMap[GPT_IMAGE_2_TIER_PRICE_KEYS.price1K]?.toString() || ''
+  const gptImage2Price2K =
+    priceMap[GPT_IMAGE_2_TIER_PRICE_KEYS.price2K]?.toString() || ''
+  const gptImage2Price4K =
+    priceMap[GPT_IMAGE_2_TIER_PRICE_KEYS.price4K]?.toString() || ''
+  Object.values(GPT_IMAGE_2_TIER_PRICE_KEYS).forEach((key) =>
+    modelNames.delete(key)
+  )
+  if (gptImage2Price1K || gptImage2Price2K || gptImage2Price4K) {
+    modelNames.add(GPT_IMAGE_2_MODEL)
+  }
+
+  return [...modelNames].map((name) => {
     const price = priceMap[name]?.toString() || ''
     const ratio = ratioMap[name]?.toString() || ''
     const cache = cacheMap[name]?.toString() || ''
@@ -238,6 +279,14 @@ export const buildModelSnapshots = ({
     const image = imageMap[name]?.toString() || ''
     const audio = audioMap[name]?.toString() || ''
     const audioCompletion = audioCompletionMap[name]?.toString() || ''
+    const tierPrices =
+      name === GPT_IMAGE_2_MODEL
+        ? {
+            gptImage2Price1K,
+            gptImage2Price2K,
+            gptImage2Price4K,
+          }
+        : {}
 
     const modeForModel = billingModeMap[name]
     if (modeForModel === 'tiered_expr') {
@@ -257,6 +306,7 @@ export const buildModelSnapshots = ({
         imageRatio: image,
         audioRatio: audio,
         audioCompletionRatio: audioCompletion,
+        ...tierPrices,
         hasConflict: false,
       }
     }
@@ -271,7 +321,15 @@ export const buildModelSnapshots = ({
       imageRatio: image,
       audioRatio: audio,
       audioCompletionRatio: audioCompletion,
-      billingMode: price !== '' ? 'per-request' : 'per-token',
+      ...tierPrices,
+      billingMode:
+        price !== '' ||
+        (name === GPT_IMAGE_2_MODEL &&
+          (gptImage2Price1K !== '' ||
+            gptImage2Price2K !== '' ||
+            gptImage2Price4K !== ''))
+          ? 'per-request'
+          : 'per-token',
       hasConflict:
         price !== '' &&
         (ratio !== '' ||
@@ -299,5 +357,8 @@ export const getSnapshotSignature = (snapshot?: ModelPricingSnapshot) => {
     billingMode: snapshot.billingMode || 'per-token',
     billingExpr: snapshot.billingExpr || '',
     requestRuleExpr: snapshot.requestRuleExpr || '',
+    gptImage2Price1K: snapshot.gptImage2Price1K || '',
+    gptImage2Price2K: snapshot.gptImage2Price2K || '',
+    gptImage2Price4K: snapshot.gptImage2Price4K || '',
   })
 }

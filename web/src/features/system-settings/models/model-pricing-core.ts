@@ -33,6 +33,9 @@ export const createModelPricingSchema = (t: (key: string) => string) =>
     imageRatio: z.string().optional(),
     audioRatio: z.string().optional(),
     audioCompletionRatio: z.string().optional(),
+    gptImage2Price1K: z.string().optional(),
+    gptImage2Price2K: z.string().optional(),
+    gptImage2Price4K: z.string().optional(),
   })
 
 export type ModelPricingFormValues = z.infer<
@@ -62,7 +65,17 @@ export type ModelRatioData = {
   billingMode?: PricingMode
   billingExpr?: string
   requestRuleExpr?: string
+  gptImage2Price1K?: string
+  gptImage2Price2K?: string
+  gptImage2Price4K?: string
 }
+
+export const GPT_IMAGE_2_MODEL = 'gpt-image-2'
+export const GPT_IMAGE_2_TIER_PRICE_KEYS = {
+  price1K: 'gpt-image-2@1k',
+  price2K: 'gpt-image-2@2k',
+  price4K: 'gpt-image-2@4k',
+} as const
 
 export type PreviewRow = {
   key: string
@@ -156,6 +169,21 @@ export function toNumberOrNull(value: unknown): number | null {
   return Number.isFinite(num) ? num : null
 }
 
+export function needsGPTImage2FallbackPrice(
+  values: ModelPricingFormValues
+): boolean {
+  if (values.name !== GPT_IMAGE_2_MODEL || hasValue(values.price)) return false
+
+  const tierPrices = [
+    values.gptImage2Price1K,
+    values.gptImage2Price2K,
+    values.gptImage2Price4K,
+  ]
+  return (
+    tierPrices.some(hasValue) && tierPrices.some((price) => !hasValue(price))
+  )
+}
+
 function ratioToBasePrice(ratio: unknown): string {
   const num = toNumberOrNull(ratio)
   if (num === null) return ''
@@ -231,13 +259,39 @@ export function buildPreviewRows(
   }
 
   if (mode === 'per-request') {
-    return [
+    const rows = [
       {
         key: 'price',
         label: 'ModelPrice',
         value: values.price || t('Empty'),
       },
     ]
+    if (values.name === GPT_IMAGE_2_MODEL) {
+      rows.push(
+        {
+          key: 'gpt-image-2-1k',
+          label: t('1K price'),
+          value: values.gptImage2Price1K
+            ? `$${values.gptImage2Price1K}`
+            : t('Fallback'),
+        },
+        {
+          key: 'gpt-image-2-2k',
+          label: t('2K price'),
+          value: values.gptImage2Price2K
+            ? `$${values.gptImage2Price2K}`
+            : t('Fallback'),
+        },
+        {
+          key: 'gpt-image-2-4k',
+          label: t('4K price'),
+          value: values.gptImage2Price4K
+            ? `$${values.gptImage2Price4K}`
+            : t('Fallback'),
+        }
+      )
+    }
+    return rows
   }
 
   return [

@@ -370,6 +370,34 @@ func GetModelPrice(name string, printErr bool) (float64, bool) {
 	return -1, false
 }
 
+const GPTImage2TierPricePrefix = "gpt-image-2@"
+
+func GPTImage2TierPriceKey(tier string) string {
+	switch tier {
+	case "1k", "2k", "4k":
+		return GPTImage2TierPricePrefix + tier
+	default:
+		return ""
+	}
+}
+
+func GetGPTImage2TierPrice(tier string) (float64, bool) {
+	key := GPTImage2TierPriceKey(tier)
+	if key == "" {
+		return 0, false
+	}
+	return GetModelPrice(key, false)
+}
+
+func HasAnyGPTImage2TierPrice() bool {
+	for _, tier := range []string{"1k", "2k", "4k"} {
+		if _, configured := GetGPTImage2TierPrice(tier); configured {
+			return true
+		}
+	}
+	return false
+}
+
 func UpdateModelRatioByJSONString(jsonStr string) error {
 	return types.LoadFromJsonStringWithCallback(modelRatioMap, jsonStr, InvalidateExposedDataCache)
 }

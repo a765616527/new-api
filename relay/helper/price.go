@@ -9,6 +9,7 @@ import (
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/QuantumNous/new-api/relaykit/types"
 	"github.com/QuantumNous/new-api/setting/billing_setting"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
@@ -78,6 +79,19 @@ func ModelPriceHelper(c *gin.Context, info *relaycommon.RelayInfo, promptTokens 
 	// Check if this model uses tiered_expr billing
 	if billing_setting.GetBillingMode(info.OriginModelName) == billing_setting.BillingModeTieredExpr {
 		return modelPriceHelperTiered(c, info, promptTokens, meta, groupRatioInfo)
+	}
+
+	if info.OriginModelName == dto.GPTImage2Model {
+		if request, ok := info.Request.(*dto.ImageRequest); ok {
+			if tier, err := dto.GPTImage2SizeTier(request.Size); err == nil {
+				if tierPrice, configured := ratio_setting.GetGPTImage2TierPrice(tier); configured {
+					modelPrice = tierPrice
+					usePrice = true
+				} else if !usePrice && ratio_setting.HasAnyGPTImage2TierPrice() {
+					return hosttypes.PriceData{}, fmt.Errorf("gpt-image-2 %s price is not configured and no fixed fallback price is available", strings.ToUpper(tier))
+				}
+			}
+		}
 	}
 
 	var preConsumedQuota int

@@ -8,6 +8,7 @@ import (
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/QuantumNous/new-api/relaykit/types"
 	"github.com/QuantumNous/new-api/setting/billing_setting"
 	"github.com/QuantumNous/new-api/setting/config"
@@ -271,4 +272,76 @@ func TestModelPriceHelperRequestBillingRatiosOnlyApplyToFixedPrice(t *testing.T)
 	require.Equal(t, "QuotaFromFloat", clamp.Op)
 	require.Equal(t, common.QuotaClampOverflow, clamp.Kind)
 	require.Nil(t, info.Billing)
+}
+
+func TestModelPriceHelperUsesGPTImage2TierPrice(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	savedModelPrices := ratio_setting.ModelPrice2JSONString()
+	t.Cleanup(func() {
+		require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(savedModelPrices))
+	})
+
+	prices, err := common.Marshal(map[string]float64{
+		dto.GPTImage2Model: 0.03,
+		ratio_setting.GPTImage2TierPriceKey(dto.ImageSizeTier1K): 0.01,
+		ratio_setting.GPTImage2TierPriceKey(dto.ImageSizeTier4K): 0.04,
+	})
+	require.NoError(t, err)
+	require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(string(prices)))
+
+	tests := []struct {
+		name          string
+		size          string
+		expectedPrice float64
+		expectedQuota int
+	}{
+		{name: "1k tier", size: "1024x768", expectedPrice: 0.01, expectedQuota: 10000},
+		{name: "missing 2k tier falls back to base", size: "1536x1024", expectedPrice: 0.03, expectedQuota: 30000},
+		{name: "auto uses 4k tier", size: "auto", expectedPrice: 0.04, expectedQuota: 40000},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+			ctx.Set("group", "default")
+			count := uint(2)
+			request := &dto.ImageRequest{Model: dto.GPTImage2Model, Size: tt.size, Quality: "high", N: &count}
+			info := &relaycommon.RelayInfo{
+				OriginModelName: dto.GPTImage2Model,
+				UserGroup:       "default",
+				UsingGroup:      "default",
+				Request:         request,
+			}
+
+			priceData, err := ModelPriceHelper(ctx, info, 0, request.GetTokenCountMeta())
+
+			require.NoError(t, err)
+			require.True(t, priceData.UsePrice)
+			require.Equal(t, tt.expectedPrice, priceData.ModelPrice)
+			require.Equal(t, tt.expectedQuota, priceData.QuotaToPreConsume)
+		})
+	}
+}
+
+func TestModelPriceHelperRejectsIncompleteGPTImage2TierPricesWithoutFallback(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	savedModelPrices := ratio_setting.ModelPrice2JSONString()
+	t.Cleanup(func() {
+		require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(savedModelPrices))
+	})
+	require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(`{"gpt-image-2@1k":0.01}`))
+
+	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	ctx.Set("group", "default")
+	request := &dto.ImageRequest{Model: dto.GPTImage2Model, Size: "1536x1024"}
+	info := &relaycommon.RelayInfo{
+		OriginModelName: dto.GPTImage2Model,
+		UserGroup:       "default",
+		UsingGroup:      "default",
+		Request:         request,
+	}
+
+	_, err := ModelPriceHelper(ctx, info, 0, request.GetTokenCountMeta())
+
+	require.EqualError(t, err, "gpt-image-2 2K price is not configured and no fixed fallback price is available")
 }

@@ -51,7 +51,11 @@ import { combineBillingExpr } from '@/features/pricing/lib/billing-expr'
 import { useMediaQuery } from '@/hooks'
 
 import { safeJsonParse } from '../utils/json-parser'
-import type { PricingMode } from './model-pricing-core'
+import {
+  GPT_IMAGE_2_MODEL,
+  GPT_IMAGE_2_TIER_PRICE_KEYS,
+  type PricingMode,
+} from './model-pricing-core'
 import {
   ModelPricingEditorPanel,
   type ModelPricingEditorPanelHandle,
@@ -294,7 +298,12 @@ const ModelRatioVisualEditorComponent = forwardRef<
       let editBillingMode: PricingMode = 'per-token'
       if (editableModel.billingMode === 'tiered_expr') {
         editBillingMode = 'tiered_expr'
-      } else if (editableModel.price && editableModel.price !== '') {
+      } else if (
+        (editableModel.price && editableModel.price !== '') ||
+        editableModel.gptImage2Price1K ||
+        editableModel.gptImage2Price2K ||
+        editableModel.gptImage2Price4K
+      ) {
         editBillingMode = 'per-request'
       }
       setEditData({
@@ -310,6 +319,9 @@ const ModelRatioVisualEditorComponent = forwardRef<
         billingMode: editBillingMode,
         billingExpr: editableModel.billingExpr,
         requestRuleExpr: editableModel.requestRuleExpr,
+        gptImage2Price1K: editableModel.gptImage2Price1K,
+        gptImage2Price2K: editableModel.gptImage2Price2K,
+        gptImage2Price4K: editableModel.gptImage2Price4K,
       })
       setEditorOpen(true)
       if (isMobile) setSheetOpen(true)
@@ -391,6 +403,12 @@ const ModelRatioVisualEditorComponent = forwardRef<
       delete audioCompletionMap[name]
       delete billingModeMap[name]
       delete billingExprMap[name]
+
+      if (name === GPT_IMAGE_2_MODEL) {
+        Object.values(GPT_IMAGE_2_TIER_PRICE_KEYS).forEach((key) => {
+          delete priceMap[key]
+        })
+      }
 
       onChange('ModelPrice', JSON.stringify(priceMap, null, 2))
       onChange('ModelRatio', JSON.stringify(ratioMap, null, 2))
@@ -527,7 +545,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
         value: string | undefined
       ) => {
         if (!value || value === '') return
-        const parsed = parseFloat(value)
+        const parsed = Number.parseFloat(value)
         if (Number.isFinite(parsed)) target[name] = parsed
       }
 
@@ -542,6 +560,27 @@ const ModelRatioVisualEditorComponent = forwardRef<
         delete audioCompletionMap[name]
         delete billingModeMap[name]
         delete billingExprMap[name]
+
+        if (name === GPT_IMAGE_2_MODEL) {
+          Object.values(GPT_IMAGE_2_TIER_PRICE_KEYS).forEach((key) => {
+            delete priceMap[key]
+          })
+          setIfPresent(
+            priceMap,
+            GPT_IMAGE_2_TIER_PRICE_KEYS.price1K,
+            data.gptImage2Price1K
+          )
+          setIfPresent(
+            priceMap,
+            GPT_IMAGE_2_TIER_PRICE_KEYS.price2K,
+            data.gptImage2Price2K
+          )
+          setIfPresent(
+            priceMap,
+            GPT_IMAGE_2_TIER_PRICE_KEYS.price4K,
+            data.gptImage2Price4K
+          )
+        }
 
         if (data.billingMode === 'tiered_expr') {
           const combined = combineBillingExpr(
@@ -564,7 +603,7 @@ const ModelRatioVisualEditorComponent = forwardRef<
           setIfPresent(imageMap, name, data.imageRatio)
           setIfPresent(audioMap, name, data.audioRatio)
           setIfPresent(audioCompletionMap, name, data.audioCompletionRatio)
-        } else if (data.price && data.price !== '') {
+        } else if (data.billingMode === 'per-request') {
           setIfPresent(priceMap, name, data.price)
         } else {
           setIfPresent(ratioMap, name, data.ratio)

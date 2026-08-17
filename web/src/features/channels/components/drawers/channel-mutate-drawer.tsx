@@ -192,6 +192,7 @@ import {
   ChannelBasicSection,
   ChannelEditorLoadingState,
   ChannelModelsSection,
+  GPTImage2RoutingFields,
 } from './sections'
 
 type ChannelMutateDrawerProps = {
@@ -3441,6 +3442,13 @@ export function ChannelMutateDrawer({
                               )}
                             </div>
                           </div>
+
+                          {currentModelsArray.includes('gpt-image-2') && (
+                            <GPTImage2RoutingFields
+                              control={form.control}
+                              disabled={isSubmitting}
+                            />
+                          )}
 
                           <div className='border-border/60 rounded-lg border p-4'>
                             <FormField

@@ -1028,6 +1028,10 @@ func (channel *Channel) GetOtherSettings() dto.ChannelOtherSettings {
 	return setting
 }
 
+func (channel *Channel) GetGPTImage2UpstreamModel(tier string) string {
+	return channel.GetOtherSettings().GPTImage2SizeModels.ModelForTier(tier)
+}
+
 func (channel *Channel) SetOtherSettings(setting dto.ChannelOtherSettings) {
 	settingBytes, err := common.Marshal(setting)
 	if err != nil {

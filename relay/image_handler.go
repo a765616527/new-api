@@ -46,13 +46,22 @@ func ImageHelper(c *gin.Context, info *relaycommon.RelayInfo) (newAPIError *type
 
 	var requestBody io.Reader
 
-	if model_setting.GetGlobalSettings().PassThroughRequestEnabled || info.ChannelSetting.PassThroughBodyEnabled {
+	passThroughBody := model_setting.GetGlobalSettings().PassThroughRequestEnabled || info.ChannelSetting.PassThroughBodyEnabled
+	jsonRequest := strings.HasPrefix(c.Request.Header.Get("Content-Type"), "application/json")
+	if passThroughBody && !info.IsModelMapped {
 		storage, err := common.GetBodyStorage(c)
 		if err != nil {
 			return types.NewErrorWithStatusCode(err, types.ErrorCodeReadRequestBodyFailed, http.StatusBadRequest, types.ErrOptionWithSkipRetry())
 		}
 		requestBody = common.NewReplayableBodyReader(storage)
+	} else if passThroughBody && info.IsModelMapped && jsonRequest {
+		requestBody, err = mappedImagePassThroughJSONBody(c, info.UpstreamModelName)
+		if err != nil {
+			return types.NewError(err, types.ErrorCodeConvertRequestFailed, types.ErrOptionWithSkipRetry())
+		}
 	} else {
+		// Multipart image edits must be rebuilt when a mapped model is in use,
+		// even if request-body pass-through is enabled.
 		convertedRequest, err := adaptor.ConvertImageRequest(c, info, *request)
 		if err != nil {
 			return types.NewError(err, types.ErrorCodeConvertRequestFailed)
@@ -148,4 +157,20 @@ func ImageHelper(c *gin.Context, info *relaycommon.RelayInfo) (newAPIError *type
 
 	service.PostTextConsumeQuota(c, info, usage.(*dto.Usage), logContent)
 	return nil
+}
+
+func mappedImagePassThroughJSONBody(c *gin.Context, upstreamModel string) (io.Reader, error) {
+	storage, err := common.GetBodyStorage(c)
+	if err != nil {
+		return nil, err
+	}
+	requestData, err := storage.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	requestData, err = relaycommon.ApplyParamOverride(requestData, map[string]interface{}{"model": upstreamModel}, nil)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(requestData), nil
 }

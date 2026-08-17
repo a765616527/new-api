@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -85,6 +86,67 @@ type ChannelOtherSettings struct {
 	UpstreamModelUpdateLastRemovedModels  []string              `json:"upstream_model_update_last_removed_models,omitempty"`  // 上次检测到的可删除模型
 	UpstreamModelUpdateIgnoredModels      []string              `json:"upstream_model_update_ignored_models,omitempty"`       // 手动忽略的模型
 	AdvancedCustom                        *AdvancedCustomConfig `json:"advanced_custom,omitempty"`
+	GPTImage2SizeModels                   *GPTImage2SizeModels  `json:"gpt_image_2_size_models,omitempty"`
+}
+
+const (
+	GPTImage2Model  = "gpt-image-2"
+	ImageSizeTier1K = "1k"
+	ImageSizeTier2K = "2k"
+	ImageSizeTier4K = "4k"
+)
+
+type GPTImage2SizeModels struct {
+	Model1K string `json:"1k,omitempty"`
+	Model2K string `json:"2k,omitempty"`
+	Model4K string `json:"4k,omitempty"`
+}
+
+func (m *GPTImage2SizeModels) ModelForTier(tier string) string {
+	if m == nil {
+		return ""
+	}
+	switch tier {
+	case ImageSizeTier1K:
+		return strings.TrimSpace(m.Model1K)
+	case ImageSizeTier2K:
+		return strings.TrimSpace(m.Model2K)
+	case ImageSizeTier4K:
+		return strings.TrimSpace(m.Model4K)
+	default:
+		return ""
+	}
+}
+
+// GPTImage2SizeTier classifies OpenAI image sizes by their longest edge.
+// An omitted size or "auto" uses the 4K route.
+func GPTImage2SizeTier(size string) (string, error) {
+	normalized := strings.ToLower(strings.TrimSpace(size))
+	if normalized == "" || normalized == "auto" {
+		return ImageSizeTier4K, nil
+	}
+
+	parts := strings.Split(normalized, "x")
+	if len(parts) != 2 {
+		return "", fmt.Errorf("invalid image size %q: expected WIDTHxHEIGHT or auto", size)
+	}
+	width, err := strconv.Atoi(strings.TrimSpace(parts[0]))
+	if err != nil || width <= 0 {
+		return "", fmt.Errorf("invalid image size %q: width must be a positive integer", size)
+	}
+	height, err := strconv.Atoi(strings.TrimSpace(parts[1]))
+	if err != nil || height <= 0 {
+		return "", fmt.Errorf("invalid image size %q: height must be a positive integer", size)
+	}
+
+	longestEdge := max(width, height)
+	if longestEdge <= 1024 {
+		return ImageSizeTier1K, nil
+	}
+	if longestEdge <= 2048 {
+		return ImageSizeTier2K, nil
+	}
+	return ImageSizeTier4K, nil
 }
 
 func (s *ChannelOtherSettings) IsOpenRouterEnterprise() bool {
