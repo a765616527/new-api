@@ -18,7 +18,9 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { render, screen } from '@testing-library/react'
 import i18next from 'i18next'
-import { beforeAll, describe, expect, test } from 'vitest'
+import { afterEach, beforeAll, describe, expect, test } from 'vitest'
+
+import zhCN from '@/i18n/locales/zh.json'
 
 import type { UsageLog } from '../../data/schema'
 import { DetailsDialog } from '../dialogs/details-dialog'
@@ -34,6 +36,11 @@ describe('GPT Image 2 request log details', () => {
       'Unit Price': 'Unit Price',
       'per image': 'per image',
     })
+    i18next.addResourceBundle('zhCN', 'translation', zhCN.translation)
+  })
+
+  afterEach(async () => {
+    await i18next.changeLanguage('en')
   })
 
   test('shows structured size, tier, quality, count, and unit price', () => {
@@ -76,5 +83,47 @@ describe('GPT Image 2 request log details', () => {
     expect(screen.getByText('2K')).toBeInTheDocument()
     expect(screen.getByText('high')).toBeInTheDocument()
     expect(screen.getByText(/0\.04.*per image/)).toBeInTheDocument()
+  })
+
+  test('shows request labels in Simplified Chinese when the interface language is Chinese', async () => {
+    await i18next.changeLanguage('zhCN')
+    const log: UsageLog = {
+      id: 2,
+      user_id: 1,
+      created_at: 1,
+      type: 2,
+      content: '',
+      username: 'user',
+      token_name: 'token',
+      model_name: 'gpt-image-2',
+      quota: 1000,
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      use_time: 1,
+      is_stream: false,
+      channel: 1,
+      channel_name: 'image',
+      token_id: 1,
+      group: 'default',
+      ip: '',
+      other: JSON.stringify({
+        image_size: '640x1040',
+        image_size_tier: '1K',
+        image_quality: 'auto',
+        image_count: 1,
+      }),
+      request_id: 'request-id-zh',
+      upstream_request_id: '',
+    }
+
+    render(
+      <DetailsDialog log={log} isAdmin open onOpenChange={() => undefined} />
+    )
+
+    expect(screen.getByText('图像请求')).toBeInTheDocument()
+    expect(screen.getByText('请求尺寸')).toBeInTheDocument()
+    expect(screen.getByText('分辨率档位')).toBeInTheDocument()
+    expect(screen.getByText('请求质量')).toBeInTheDocument()
+    expect(screen.getByText('图片数量')).toBeInTheDocument()
   })
 })

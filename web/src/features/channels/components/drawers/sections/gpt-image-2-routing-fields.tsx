@@ -42,13 +42,13 @@ export function GPTImage2RoutingFields(props: GPTImage2RoutingFieldsProps) {
     {
       name: 'gpt_image_2_model_1k' as const,
       label: t('1K upstream model'),
-      description: t('Longest edge up to 1024 pixels.'),
+      description: t('Longest edge below 1500 pixels.'),
       placeholder: 'gpt-image-2-1k',
     },
     {
       name: 'gpt_image_2_model_2k' as const,
       label: t('2K upstream model'),
-      description: t('Longest edge above 1024 and up to 2048 pixels.'),
+      description: t('Longest edge from 1500 through 2048 pixels.'),
       placeholder: 'gpt-image-2-2k',
     },
     {
