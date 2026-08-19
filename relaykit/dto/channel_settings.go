@@ -119,8 +119,8 @@ func (m *GPTImage2SizeModels) ModelForTier(tier string) string {
 }
 
 // GPTImage2SizeTier classifies OpenAI image sizes by their longest edge.
-// The 1K upstream supports edges above 1024, so 1500 is used as a conservative
-// exclusive boundary. An omitted size or "auto" uses the 4K route.
+// The 1K upstream supports a longest edge of 1536 pixels, inclusive.
+// An omitted size or "auto" uses the 4K route.
 func GPTImage2SizeTier(size string) (string, error) {
 	normalized := strings.ToLower(strings.TrimSpace(size))
 	if normalized == "" || normalized == "auto" {
@@ -141,7 +141,7 @@ func GPTImage2SizeTier(size string) (string, error) {
 	}
 
 	longestEdge := max(width, height)
-	if longestEdge < 1500 {
+	if longestEdge <= 1536 {
 		return ImageSizeTier1K, nil
 	}
 	if longestEdge <= 2048 {

@@ -24,7 +24,7 @@ func TestGetModelRequestClassifiesGPTImage2GenerationSize(t *testing.T) {
 	require.NoError(t, err)
 	assert.True(t, shouldSelect)
 	assert.Equal(t, dto.GPTImage2Model, request.Model)
-	assert.Equal(t, dto.ImageSizeTier2K, request.Size)
+	assert.Equal(t, dto.ImageSizeTier1K, request.Size)
 }
 
 func TestGetModelRequestRoutesAutoImageEditTo4K(t *testing.T) {

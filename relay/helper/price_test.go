@@ -296,7 +296,7 @@ func TestModelPriceHelperUsesGPTImage2TierPrice(t *testing.T) {
 		expectedQuota int
 	}{
 		{name: "1k tier", size: "1024x768", expectedPrice: 0.01, expectedQuota: 10000},
-		{name: "missing 2k tier falls back to base", size: "1536x1024", expectedPrice: 0.03, expectedQuota: 30000},
+		{name: "missing 2k tier falls back to base", size: "1537x1024", expectedPrice: 0.03, expectedQuota: 30000},
 		{name: "auto uses 4k tier", size: "auto", expectedPrice: 0.04, expectedQuota: 40000},
 	}
 
@@ -333,7 +333,7 @@ func TestModelPriceHelperRejectsIncompleteGPTImage2TierPricesWithoutFallback(t *
 
 	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
 	ctx.Set("group", "default")
-	request := &dto.ImageRequest{Model: dto.GPTImage2Model, Size: "1536x1024"}
+	request := &dto.ImageRequest{Model: dto.GPTImage2Model, Size: "1537x1024"}
 	info := &relaycommon.RelayInfo{
 		OriginModelName: dto.GPTImage2Model,
 		UserGroup:       "default",
