@@ -3989,6 +3989,7 @@
     "Route active": "Route active",
     "Route Description": "Route Description",
     "Route gpt-image-2 requests by the longest edge of the size field. Leave a tier empty to exclude this channel from that tier.": "Route gpt-image-2 requests by the longest edge of the size field. Leave a tier empty to exclude this channel from that tier.",
+    "Route gpt-image-2 requests by the longest edge of the size field. Leave an individual tier empty to exclude this channel from that tier. If all three tiers are empty, gpt-image-2 is passed through directly.": "Route gpt-image-2 requests by the longest edge of the size field. Leave an individual tier empty to exclude this channel from that tier. If all three tiers are empty, gpt-image-2 is passed through directly.",
     "Route group": "Route group",
     "Route is required": "Route is required",
     "Route models must be unique for the same incoming path": "Route models must be unique for the same incoming path",

@@ -65,7 +65,7 @@ export function GPTImage2RoutingFields(props: GPTImage2RoutingFieldsProps) {
         <FormLabel>{t('GPT Image 2 Resolution Routing')}</FormLabel>
         <FormDescription>
           {t(
-            'Route gpt-image-2 requests by the longest edge of the size field. Leave a tier empty to exclude this channel from that tier.'
+            'Route gpt-image-2 requests by the longest edge of the size field. Leave an individual tier empty to exclude this channel from that tier. If all three tiers are empty, gpt-image-2 is passed through directly.'
           )}
         </FormDescription>
       </div>

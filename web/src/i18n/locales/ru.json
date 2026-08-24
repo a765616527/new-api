@@ -3989,6 +3989,7 @@
     "Route active": "Маршрут активен",
     "Route Description": "Описание маршрута",
     "Route gpt-image-2 requests by the longest edge of the size field. Leave a tier empty to exclude this channel from that tier.": "Маршрутизируйте запросы gpt-image-2 по длинной стороне поля size. Оставьте уровень пустым, чтобы исключить этот канал из маршрутизации для него.",
+    "Route gpt-image-2 requests by the longest edge of the size field. Leave an individual tier empty to exclude this channel from that tier. If all three tiers are empty, gpt-image-2 is passed through directly.": "Запросы gpt-image-2 маршрутизируются по длинной стороне поля size. Если отдельный уровень не заполнен, канал исключается из него. Если не заполнены все три уровня, gpt-image-2 передаётся напрямую.",
     "Route group": "Группа маршрутов",
     "Route is required": "Маршрут обязателен",
     "Route models must be unique for the same incoming path": "Модели маршрутов для одного входного пути должны быть уникальными",

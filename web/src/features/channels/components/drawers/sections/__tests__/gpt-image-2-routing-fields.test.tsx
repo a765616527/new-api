@@ -58,6 +58,16 @@ describe('GPT Image 2 resolution routing fields', () => {
     ).toBeVisible()
   })
 
+  test('explains that leaving all tiers empty enables direct pass-through', () => {
+    render(<Harness />)
+
+    expect(
+      screen.getByText(
+        /If all three tiers are empty, gpt-image-2 is passed through directly/
+      )
+    ).toBeVisible()
+  })
+
   test('disables every input while the channel is being saved', () => {
     render(<Harness disabled />)
 

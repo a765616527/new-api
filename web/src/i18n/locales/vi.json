@@ -3989,6 +3989,7 @@
     "Route active": "Tuyến đang hoạt động",
     "Route Description": "Mô tả lộ trình",
     "Route gpt-image-2 requests by the longest edge of the size field. Leave a tier empty to exclude this channel from that tier.": "Định tuyến yêu cầu gpt-image-2 theo cạnh dài nhất của trường size. Để trống một mức để loại kênh này khỏi mức đó.",
+    "Route gpt-image-2 requests by the longest edge of the size field. Leave an individual tier empty to exclude this channel from that tier. If all three tiers are empty, gpt-image-2 is passed through directly.": "Định tuyến yêu cầu gpt-image-2 theo cạnh dài nhất của trường size. Để trống riêng một mức sẽ loại kênh này khỏi mức đó. Nếu cả ba mức đều để trống, gpt-image-2 sẽ được chuyển tiếp trực tiếp.",
     "Route group": "Nhóm tuyến",
     "Route is required": "Đường dẫn là bắt buộc",
     "Route models must be unique for the same incoming path": "Các mô hình tuyến phải là duy nhất cho cùng đường dẫn đầu vào",

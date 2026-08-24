@@ -3989,6 +3989,7 @@
     "Route active": "ルート有効",
     "Route Description": "ルートの説明",
     "Route gpt-image-2 requests by the longest edge of the size field. Leave a tier empty to exclude this channel from that tier.": "size フィールドの長辺に基づいて gpt-image-2 リクエストをルーティングします。空欄の階層では、このチャネルは選択されません。",
+    "Route gpt-image-2 requests by the longest edge of the size field. Leave an individual tier empty to exclude this channel from that tier. If all three tiers are empty, gpt-image-2 is passed through directly.": "size フィールドの長辺に基づいて gpt-image-2 リクエストをルーティングします。個別の階層を空欄にすると、その階層ではこのチャネルが除外されます。3 階層すべてが空欄の場合は、gpt-image-2 をそのまま転送します。",
     "Route group": "ルートグループ",
     "Route is required": "ルートは必須です",
     "Route models must be unique for the same incoming path": "同じ入力パスではルートのモデルを一意にしてください",

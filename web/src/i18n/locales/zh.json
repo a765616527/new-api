@@ -3989,6 +3989,7 @@
     "Route active": "路由已启用",
     "Route Description": "路由描述",
     "Route gpt-image-2 requests by the longest edge of the size field. Leave a tier empty to exclude this channel from that tier.": "根据 size 字段的最长边路由 gpt-image-2 请求。留空某一档位可让此渠道不参与该档位的路由。",
+    "Route gpt-image-2 requests by the longest edge of the size field. Leave an individual tier empty to exclude this channel from that tier. If all three tiers are empty, gpt-image-2 is passed through directly.": "根据 size 字段的最长边路由 gpt-image-2 请求。单独留空某一档位时，此渠道不参与该档位的路由；三档全部留空时，将直接透传 gpt-image-2。",
     "Route group": "路由组",
     "Route is required": "路由为必填项",
     "Route models must be unique for the same incoming path": "同一入口路径下的路由模型必须唯一",

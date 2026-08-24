@@ -1029,7 +1029,14 @@ func (channel *Channel) GetOtherSettings() dto.ChannelOtherSettings {
 }
 
 func (channel *Channel) GetGPTImage2UpstreamModel(tier string) string {
-	return channel.GetOtherSettings().GPTImage2SizeModels.ModelForTier(tier)
+	sizeModels := channel.GetOtherSettings().GPTImage2SizeModels
+	if sizeModels == nil ||
+		(strings.TrimSpace(sizeModels.Model1K) == "" &&
+			strings.TrimSpace(sizeModels.Model2K) == "" &&
+			strings.TrimSpace(sizeModels.Model4K) == "") {
+		return dto.GPTImage2Model
+	}
+	return sizeModels.ModelForTier(tier)
 }
 
 func (channel *Channel) SetOtherSettings(setting dto.ChannelOtherSettings) {
