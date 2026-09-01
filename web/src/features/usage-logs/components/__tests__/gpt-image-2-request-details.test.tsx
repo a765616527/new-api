@@ -16,6 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import i18next from 'i18next'
 import { afterEach, beforeAll, describe, expect, test } from 'vitest'
@@ -25,7 +26,35 @@ import zhCN from '@/i18n/locales/zh.json'
 import type { UsageLog } from '../../data/schema'
 import { DetailsDialog } from '../dialogs/details-dialog'
 
+function renderDetails(log: UsageLog): QueryClient {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
+  const freshAt = Date.now() + 60_000
+  queryClient.setQueryData(['status'], {}, { updatedAt: freshAt })
+  queryClient.setQueryData(
+    ['pricing'],
+    { data: [], vendors: [] },
+    { updatedAt: freshAt }
+  )
+
+  render(
+    <QueryClientProvider client={queryClient}>
+      <DetailsDialog
+        log={log}
+        isAdmin
+        isRoot={false}
+        open
+        onOpenChange={() => undefined}
+      />
+    </QueryClientProvider>
+  )
+  return queryClient
+}
+
 describe('GPT Image 2 request log details', () => {
+  const queryClients: QueryClient[] = []
+
   beforeAll(() => {
     i18next.addResourceBundle('en', 'translation', {
       'Image Request': 'Image Request',
@@ -40,6 +69,10 @@ describe('GPT Image 2 request log details', () => {
   })
 
   afterEach(async () => {
+    for (const queryClient of queryClients) {
+      queryClient.clear()
+    }
+    queryClients.length = 0
     await i18next.changeLanguage('en')
   })
 
@@ -74,9 +107,7 @@ describe('GPT Image 2 request log details', () => {
       upstream_request_id: '',
     }
 
-    render(
-      <DetailsDialog log={log} isAdmin open onOpenChange={() => undefined} />
-    )
+    queryClients.push(renderDetails(log))
 
     expect(screen.getByText('Image Request')).toBeInTheDocument()
     expect(screen.getByText('1536x1024')).toBeInTheDocument()
@@ -116,9 +147,7 @@ describe('GPT Image 2 request log details', () => {
       upstream_request_id: '',
     }
 
-    render(
-      <DetailsDialog log={log} isAdmin open onOpenChange={() => undefined} />
-    )
+    queryClients.push(renderDetails(log))
 
     expect(screen.getByText('图像请求')).toBeInTheDocument()
     expect(screen.getByText('请求尺寸')).toBeInTheDocument()
