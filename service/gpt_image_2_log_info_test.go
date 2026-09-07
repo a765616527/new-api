@@ -3,6 +3,7 @@ package service
 import (
 	"testing"
 
+	"github.com/QuantumNous/new-api/model"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
@@ -32,15 +33,16 @@ func TestAppendGPTImage2RequestInfoRecordsStructuredFields(t *testing.T) {
 			ModelPrice: 0.08,
 		},
 	}
-	other := map[string]interface{}{}
+	other := model.NewLogOther()
 
 	appendGPTImage2RequestInfo(other, info)
+	snapshot := other.Snapshot()
 
-	assert.Equal(t, "auto", other["image_size"])
-	assert.Equal(t, "high", other["image_quality"])
-	assert.Equal(t, "4K", other["image_size_tier"])
-	assert.Equal(t, count, other["image_count"])
-	assert.Equal(t, 0.08, other["image_unit_price"])
+	assert.Equal(t, "auto", snapshot["image_size"])
+	assert.Equal(t, "high", snapshot["image_quality"])
+	assert.Equal(t, "4K", snapshot["image_size_tier"])
+	assert.Equal(t, count, snapshot["image_count"])
+	assert.Equal(t, 0.08, snapshot["image_unit_price"])
 }
 
 func TestAppendGPTImage2RequestInfoUsesAutoDefaults(t *testing.T) {
@@ -48,13 +50,14 @@ func TestAppendGPTImage2RequestInfoUsesAutoDefaults(t *testing.T) {
 		OriginModelName: dto.GPTImage2Model,
 		Request:         &dto.ImageRequest{Model: dto.GPTImage2Model},
 	}
-	other := map[string]interface{}{}
+	other := model.NewLogOther()
 
 	appendGPTImage2RequestInfo(other, info)
+	snapshot := other.Snapshot()
 
-	assert.Equal(t, "auto", other["image_size"])
-	assert.Equal(t, "auto", other["image_quality"])
-	assert.Equal(t, "4K", other["image_size_tier"])
-	assert.Equal(t, uint(1), other["image_count"])
-	assert.NotContains(t, other, "image_unit_price")
+	assert.Equal(t, "auto", snapshot["image_size"])
+	assert.Equal(t, "auto", snapshot["image_quality"])
+	assert.Equal(t, "4K", snapshot["image_size_tier"])
+	assert.Equal(t, uint(1), snapshot["image_count"])
+	assert.NotContains(t, snapshot, "image_unit_price")
 }
