@@ -104,10 +104,11 @@ func TestCacheGetRandomSatisfiedChannelUsesTokenAutoGroupsWhenGlobalAutoIsEmpty(
 
 	retry := 0
 	param := &RetryParam{
-		Ctx:        ctx,
-		TokenGroup: "auto",
-		ModelName:  modelName,
-		Retry:      &retry,
+		Ctx:         ctx,
+		TokenGroup:  "auto",
+		ModelName:   modelName,
+		RequestPath: "/v1/chat/completions",
+		Retry:       &retry,
 	}
 
 	first, selectedGroup, err := CacheGetRandomSatisfiedChannel(param)

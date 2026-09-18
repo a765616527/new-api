@@ -39,6 +39,7 @@ const (
 	FilterRequestPath        ChannelFilterKind = "request_path"
 	FilterImageSizeTier      ChannelFilterKind = "image_size_tier"
 	FilterTaskPluginIdentity ChannelFilterKind = "task_plugin_identity"
+	FilterResponsesWebSocket ChannelFilterKind = "responses_websocket"
 )
 
 type ChannelFilter struct {
@@ -46,6 +47,7 @@ type ChannelFilter struct {
 	RequestPath            string
 	ImageSizeTier          string
 	TaskPluginKey          string
+	TaskPluginKeys         []string
 	TaskPluginChannelTypes []int
 }
 

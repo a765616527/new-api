@@ -2,7 +2,6 @@ package relay
 
 import (
 	"bytes"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,9 +22,7 @@ func TestMappedImagePassThroughJSONBodyRewritesOnlyModel(t *testing.T) {
 	)
 	c.Request.Header.Set("Content-Type", "application/json")
 
-	body, err := mappedImagePassThroughJSONBody(c, "vendor-image-2k")
-	require.NoError(t, err)
-	data, err := io.ReadAll(body)
+	data, err := mappedImagePassThroughJSONBody(c, "vendor-image-2k")
 	require.NoError(t, err)
 
 	var decoded map[string]interface{}
