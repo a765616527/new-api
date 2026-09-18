@@ -89,6 +89,8 @@ type ChannelOtherSettings struct {
 	UpstreamModelUpdateIgnoredModels      []string              `json:"upstream_model_update_ignored_models,omitempty"`       // 手动忽略的模型
 	AdvancedCustom                        *AdvancedCustomConfig `json:"advanced_custom,omitempty"`
 	GPTImage2SizeModels                   *GPTImage2SizeModels  `json:"gpt_image_2_size_models,omitempty"`
+	GPTImage25FlareSizeModels             *GPTImage2SizeModels  `json:"gpt_image_2_5_flare_size_models,omitempty"`
+	GPTImage25SunburstSizeModels          *GPTImage2SizeModels  `json:"gpt_image_2_5_sunburst_size_models,omitempty"`
 	// OllamaOpenAIChat routes Ollama chat completions to the OpenAI-compatible
 	// /v1/chat/completions endpoint. When unset, chat completions keep using
 	// the native /api/chat protocol.
@@ -100,11 +102,35 @@ type ChannelOtherSettings struct {
 }
 
 const (
-	GPTImage2Model  = "gpt-image-2"
-	ImageSizeTier1K = "1k"
-	ImageSizeTier2K = "2k"
-	ImageSizeTier4K = "4k"
+	GPTImage2Model          = "gpt-image-2"
+	GPTImage25FlareModel    = "gpt-image-2.5-flare"
+	GPTImage25SunburstModel = "gpt-image-2.5-sunburst"
+	ImageSizeTier1K         = "1k"
+	ImageSizeTier2K         = "2k"
+	ImageSizeTier4K         = "4k"
 )
+
+func IsGPTImageSizeRoutedModel(model string) bool {
+	switch strings.TrimSpace(model) {
+	case GPTImage2Model, GPTImage25FlareModel, GPTImage25SunburstModel:
+		return true
+	default:
+		return false
+	}
+}
+
+func (s ChannelOtherSettings) GPTImageSizeModelsFor(model string) *GPTImage2SizeModels {
+	switch strings.TrimSpace(model) {
+	case GPTImage2Model:
+		return s.GPTImage2SizeModels
+	case GPTImage25FlareModel:
+		return s.GPTImage25FlareSizeModels
+	case GPTImage25SunburstModel:
+		return s.GPTImage25SunburstSizeModels
+	default:
+		return nil
+	}
+}
 
 type GPTImage2SizeModels struct {
 	Model1K string `json:"1k,omitempty"`

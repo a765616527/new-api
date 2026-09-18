@@ -81,12 +81,25 @@ export type ModelRatioData = {
   gptImage2Price4K?: string
 }
 
-export const GPT_IMAGE_2_MODEL = 'gpt-image-2'
-export const GPT_IMAGE_2_TIER_PRICE_KEYS = {
-  price1K: 'gpt-image-2@1k',
-  price2K: 'gpt-image-2@2k',
-  price4K: 'gpt-image-2@4k',
-} as const
+export const GPT_IMAGE_SIZE_ROUTED_MODELS = [
+  'gpt-image-2',
+  'gpt-image-2.5-flare',
+  'gpt-image-2.5-sunburst',
+] as const
+
+export function isGPTImageSizeRoutedModel(name: string): boolean {
+  return (GPT_IMAGE_SIZE_ROUTED_MODELS as readonly string[]).includes(name)
+}
+
+export function gptImageTierPriceKeys(model: string) {
+  return {
+    price1K: `${model}@1k`,
+    price2K: `${model}@2k`,
+    price4K: `${model}@4k`,
+  }
+}
+
+
 
 export type PreviewRow = {
   unit?: 'image' | 'none'
@@ -182,7 +195,9 @@ export function toNumberOrNull(value: unknown): number | null {
 export function needsGPTImage2FallbackPrice(
   values: ModelPricingFormValues
 ): boolean {
-  if (values.name !== GPT_IMAGE_2_MODEL || hasValue(values.price)) return false
+  if (!isGPTImageSizeRoutedModel(values.name) || hasValue(values.price)) {
+    return false
+  }
 
   const tierPrices = [
     values.gptImage2Price1K,
@@ -285,7 +300,7 @@ export function buildPreviewRows(
       },
       ...pricingAdjustmentRows(billingDetails, t),
     ]
-    if (values.name === GPT_IMAGE_2_MODEL) {
+    if (isGPTImageSizeRoutedModel(values.name)) {
       rows.push(
         {
           key: 'gpt-image-2-1k',

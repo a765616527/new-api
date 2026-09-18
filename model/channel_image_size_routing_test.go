@@ -40,6 +40,37 @@ func TestFilterChannelsByImageSizeTier(t *testing.T) {
 	assert.Empty(t, emptiedBy)
 }
 
+func TestFilterChannelsByImageSizeTierForFlare(t *testing.T) {
+	channelSyncLock.Lock()
+	previousChannels := channelsIDM
+	channelsIDM = map[int]*Channel{
+		1: {Id: 1, OtherSettings: `{"gpt_image_2_5_flare_size_models":{"1k":"flare-1k"}}`},
+		2: {Id: 2, OtherSettings: `{"gpt_image_2_5_flare_size_models":{"2k":"flare-2k"}}`},
+		3: {Id: 3, OtherSettings: `{"gpt_image_2_size_models":{"2k":"image2-2k"}}`},
+		4: {Id: 4, OtherSettings: `{}`},
+	}
+	channelSyncLock.Unlock()
+	t.Cleanup(func() {
+		channelSyncLock.Lock()
+		channelsIDM = previousChannels
+		channelSyncLock.Unlock()
+	})
+
+	channelSyncLock.RLock()
+	filtered, emptiedBy := filterCandidateIDs(
+		[]int{1, 2, 3, 4},
+		relaydto.GPTImage25FlareModel,
+		[]taskdto.ChannelFilter{{
+			Kind:          taskdto.FilterImageSizeTier,
+			ImageSizeTier: relaydto.ImageSizeTier2K,
+		}},
+	)
+	channelSyncLock.RUnlock()
+
+	assert.Equal(t, []int{2, 3, 4}, filtered)
+	assert.Empty(t, emptiedBy)
+}
+
 func TestGPTImage2UpstreamModelRoutingMode(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -80,4 +111,12 @@ func TestGPTImage2UpstreamModelRoutingMode(t *testing.T) {
 			assert.Equal(t, tt.expected, channel.GetGPTImage2UpstreamModel(tt.tier))
 		})
 	}
+}
+
+func TestGPTImage25UpstreamModelRouting(t *testing.T) {
+	channel := &Channel{OtherSettings: `{"gpt_image_2_5_sunburst_size_models":{"4k":"sunburst-4k"}}`}
+
+	assert.Equal(t, "sunburst-4k", channel.GetGPTImageSizeUpstreamModel(relaydto.GPTImage25SunburstModel, relaydto.ImageSizeTier4K))
+	assert.Equal(t, "", channel.GetGPTImageSizeUpstreamModel(relaydto.GPTImage25SunburstModel, relaydto.ImageSizeTier1K))
+	assert.Equal(t, relaydto.GPTImage25FlareModel, channel.GetGPTImageSizeUpstreamModel(relaydto.GPTImage25FlareModel, relaydto.ImageSizeTier1K))
 }

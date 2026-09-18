@@ -370,32 +370,47 @@ func GetModelPrice(name string, printErr bool) (float64, bool) {
 	return -1, false
 }
 
-const GPTImage2TierPricePrefix = "gpt-image-2@"
-
-func GPTImage2TierPriceKey(tier string) string {
+func GPTImageTierPriceKey(model, tier string) string {
+	switch model {
+	case "gpt-image-2", "gpt-image-2.5-flare", "gpt-image-2.5-sunburst":
+	default:
+		return ""
+	}
 	switch tier {
 	case "1k", "2k", "4k":
-		return GPTImage2TierPricePrefix + tier
+		return model + "@" + tier
 	default:
 		return ""
 	}
 }
 
-func GetGPTImage2TierPrice(tier string) (float64, bool) {
-	key := GPTImage2TierPriceKey(tier)
+func GPTImage2TierPriceKey(tier string) string {
+	return GPTImageTierPriceKey("gpt-image-2", tier)
+}
+
+func GetGPTImageTierPrice(model, tier string) (float64, bool) {
+	key := GPTImageTierPriceKey(model, tier)
 	if key == "" {
 		return 0, false
 	}
 	return GetModelPrice(key, false)
 }
 
-func HasAnyGPTImage2TierPrice() bool {
+func GetGPTImage2TierPrice(tier string) (float64, bool) {
+	return GetGPTImageTierPrice("gpt-image-2", tier)
+}
+
+func HasAnyGPTImageTierPrice(model string) bool {
 	for _, tier := range []string{"1k", "2k", "4k"} {
-		if _, configured := GetGPTImage2TierPrice(tier); configured {
+		if _, configured := GetGPTImageTierPrice(model, tier); configured {
 			return true
 		}
 	}
 	return false
+}
+
+func HasAnyGPTImage2TierPrice() bool {
+	return HasAnyGPTImageTierPrice("gpt-image-2")
 }
 
 func UpdateModelRatioByJSONString(jsonStr string) error {

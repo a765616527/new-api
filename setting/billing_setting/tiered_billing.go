@@ -62,7 +62,7 @@ func GetBillingMode(model string) string {
 		if _, configured := ratio_setting.GetModelPrice(model, false); configured {
 			return BillingModeRatio
 		}
-		if model == "gpt-image-2" && ratio_setting.HasAnyGPTImage2TierPrice() {
+		if ratio_setting.HasAnyGPTImageTierPrice(model) {
 			return BillingModeRatio
 		}
 		return BillingModeTieredExpr

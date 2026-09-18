@@ -45,3 +45,17 @@ func TestGetModelRequestRoutesAutoImageEditTo4K(t *testing.T) {
 	assert.True(t, shouldSelect)
 	assert.Equal(t, dto.ImageSizeTier4K, request.Size)
 }
+
+func TestGetModelRequestClassifiesGPTImage25FlareSize(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodPost, "/v1/images/generations", bytes.NewBufferString(`{"model":"gpt-image-2.5-flare","size":"2048x1152"}`))
+	c.Request.Header.Set("Content-Type", "application/json")
+
+	request, shouldSelect, err := getModelRequest(c)
+
+	require.NoError(t, err)
+	assert.True(t, shouldSelect)
+	assert.Equal(t, dto.GPTImage25FlareModel, request.Model)
+	assert.Equal(t, dto.ImageSizeTier2K, request.Size)
+}

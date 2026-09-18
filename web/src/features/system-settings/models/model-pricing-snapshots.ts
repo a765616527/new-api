@@ -21,8 +21,9 @@ import { splitPluginBillingExprKey } from '@/features/pricing/lib/plugin-pricing
 
 import { safeJsonParse } from '../utils/json-parser'
 import {
-  GPT_IMAGE_2_MODEL,
-  GPT_IMAGE_2_TIER_PRICE_KEYS,
+  GPT_IMAGE_SIZE_ROUTED_MODELS,
+  gptImageTierPriceKeys,
+  isGPTImageSizeRoutedModel,
 } from './model-pricing-core'
 import { formatPricingNumber } from './pricing-format'
 
@@ -127,7 +128,7 @@ export const getPriceSummary = (
   }
   if (row.billingMode === 'per-request') {
     if (
-      row.name === GPT_IMAGE_2_MODEL &&
+      isGPTImageSizeRoutedModel(row.name) &&
       (row.gptImage2Price1K || row.gptImage2Price2K || row.gptImage2Price4K)
     ) {
       return [
@@ -158,7 +159,7 @@ export const getPriceDetail = (
   }
   if (row.billingMode === 'per-request') {
     if (
-      row.name === GPT_IMAGE_2_MODEL &&
+      isGPTImageSizeRoutedModel(row.name) &&
       (row.gptImage2Price1K || row.gptImage2Price2K || row.gptImage2Price4K)
     ) {
       return t('Resolution-based image price')
@@ -265,18 +266,32 @@ export const buildModelSnapshots = ({
     ...Object.keys(billingExprMap),
   ])
 
-  const gptImage2Price1K =
-    priceMap[GPT_IMAGE_2_TIER_PRICE_KEYS.price1K]?.toString() || ''
-  const gptImage2Price2K =
-    priceMap[GPT_IMAGE_2_TIER_PRICE_KEYS.price2K]?.toString() || ''
-  const gptImage2Price4K =
-    priceMap[GPT_IMAGE_2_TIER_PRICE_KEYS.price4K]?.toString() || ''
-  Object.values(GPT_IMAGE_2_TIER_PRICE_KEYS).forEach((key) =>
-    modelNames.delete(key)
-  )
-  if (gptImage2Price1K || gptImage2Price2K || gptImage2Price4K) {
-    modelNames.add(GPT_IMAGE_2_MODEL)
-  }
+  const gptImageTierPrices = Object.fromEntries(
+    GPT_IMAGE_SIZE_ROUTED_MODELS.map((model) => {
+      const keys = gptImageTierPriceKeys(model)
+      const prices = {
+        gptImage2Price1K: priceMap[keys.price1K]?.toString() || '',
+        gptImage2Price2K: priceMap[keys.price2K]?.toString() || '',
+        gptImage2Price4K: priceMap[keys.price4K]?.toString() || '',
+      }
+      Object.values(keys).forEach((key) => modelNames.delete(key))
+      if (
+        prices.gptImage2Price1K ||
+        prices.gptImage2Price2K ||
+        prices.gptImage2Price4K
+      ) {
+        modelNames.add(model)
+      }
+      return [model, prices]
+    })
+  ) as Record<
+    string,
+    {
+      gptImage2Price1K: string
+      gptImage2Price2K: string
+      gptImage2Price4K: string
+    }
+  >
   return [...modelNames].map((name) => {
     const price = priceMap[name]?.toString() || ''
     const ratio = ratioMap[name]?.toString() || ''
@@ -286,14 +301,9 @@ export const buildModelSnapshots = ({
     const image = imageMap[name]?.toString() || ''
     const audio = audioMap[name]?.toString() || ''
     const audioCompletion = audioCompletionMap[name]?.toString() || ''
-    const tierPrices =
-      name === GPT_IMAGE_2_MODEL
-        ? {
-            gptImage2Price1K,
-            gptImage2Price2K,
-            gptImage2Price4K,
-          }
-        : {}
+    const tierPrices = isGPTImageSizeRoutedModel(name)
+      ? gptImageTierPrices[name]
+      : {}
 
     const modeForModel = billingModeMap[name]
     if (modeForModel === 'tiered_expr') {
@@ -333,10 +343,10 @@ export const buildModelSnapshots = ({
       ...tierPrices,
       billingMode:
         price !== '' ||
-        (name === GPT_IMAGE_2_MODEL &&
-          (gptImage2Price1K !== '' ||
-            gptImage2Price2K !== '' ||
-            gptImage2Price4K !== ''))
+        (isGPTImageSizeRoutedModel(name) &&
+          (gptImageTierPrices[name]?.gptImage2Price1K !== '' ||
+            gptImageTierPrices[name]?.gptImage2Price2K !== '' ||
+            gptImageTierPrices[name]?.gptImage2Price4K !== ''))
           ? 'per-request'
           : 'per-token',
       hasConflict:

@@ -3473,12 +3473,11 @@ export function ChannelMutateDrawer({
             />
           </div>
         </div>
-        {currentModelsArray.includes('gpt-image-2') && (
-          <GPTImage2RoutingFields
-            control={form.control}
-            disabled={isSubmitting}
-          />
-        )}
+        <GPTImage2RoutingFields
+          control={form.control}
+          disabled={isSubmitting}
+          models={currentModelsArray}
+        />
       </ChannelModelsSection>
     </div>
   )

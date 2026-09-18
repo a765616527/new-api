@@ -51,7 +51,7 @@ func Distribute() func(c *gin.Context) {
 			abortWithOpenAiMessage(c, http.StatusBadRequest, i18n.T(c, i18n.MsgDistributorInvalidRequest, map[string]any{"Error": err.Error()}))
 			return
 		}
-		if modelRequest.Model == dto.GPTImage2Model && modelRequest.Size != "" {
+		if dto.IsGPTImageSizeRoutedModel(modelRequest.Model) && modelRequest.Size != "" {
 			constraints.AddFilter(taskdto.ChannelFilter{
 				Kind:          taskdto.FilterImageSizeTier,
 				ImageSizeTier: modelRequest.Size,
@@ -488,7 +488,7 @@ func getModelRequest(c *gin.Context) (*ModelRequest, bool, error) {
 			}
 		}
 	}
-	if modelRequest.Model == dto.GPTImage2Model &&
+	if dto.IsGPTImageSizeRoutedModel(modelRequest.Model) &&
 		(strings.HasPrefix(c.Request.URL.Path, "/v1/images/generations") || strings.HasPrefix(c.Request.URL.Path, "/v1/images/edits")) {
 		tier, tierErr := dto.GPTImage2SizeTier(modelRequest.Size)
 		if tierErr != nil {
@@ -632,9 +632,9 @@ func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, mode
 	common.SetContextKey(c, constant.ContextKeyChannelAutoBan, channel.GetAutoBan())
 	common.SetContextKey(c, constant.ContextKeyChannelModelMapping, channel.GetModelMapping())
 	common.SetContextKey(c, constant.ContextKeyChannelSizeMappedModel, "")
-	if modelName == dto.GPTImage2Model {
+	if dto.IsGPTImageSizeRoutedModel(modelName) {
 		tier := common.GetContextKeyString(c, constant.ContextKeyImageSizeTier)
-		common.SetContextKey(c, constant.ContextKeyChannelSizeMappedModel, channel.GetGPTImage2UpstreamModel(tier))
+		common.SetContextKey(c, constant.ContextKeyChannelSizeMappedModel, channel.GetGPTImageSizeUpstreamModel(modelName, tier))
 	}
 	common.SetContextKey(c, constant.ContextKeyChannelStatusCodeMapping, channel.GetStatusCodeMapping())
 

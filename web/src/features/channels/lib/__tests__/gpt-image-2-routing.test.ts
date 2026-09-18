@@ -72,4 +72,20 @@ describe('GPT Image 2 channel routing settings', () => {
     expect(defaults.gpt_image_2_model_2k).toBe('two')
     expect(defaults.gpt_image_2_model_4k).toBe('four')
   })
+
+  test('serializes GPT Image 2.5 flare and sunburst tiers independently', () => {
+    const result = transformFormDataToCreatePayload({
+      ...CHANNEL_FORM_DEFAULT_VALUES,
+      name: 'Image 2.5 upstream',
+      models: 'gpt-image-2.5-flare,gpt-image-2.5-sunburst',
+      key: 'test-key',
+      gpt_image_2_5_flare_model_1k: 'flare-1k',
+      gpt_image_2_5_sunburst_model_4k: 'sunburst-4k',
+    })
+
+    expect(JSON.parse(result.channel.settings || '{}')).toMatchObject({
+      gpt_image_2_5_flare_size_models: { '1k': 'flare-1k' },
+      gpt_image_2_5_sunburst_size_models: { '4k': 'sunburst-4k' },
+    })
+  })
 })

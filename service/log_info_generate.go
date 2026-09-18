@@ -66,7 +66,7 @@ func appendRequestPath(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, other
 }
 
 func appendGPTImage2RequestInfo(other *model.LogOther, relayInfo *relaycommon.RelayInfo) {
-	if other == nil || relayInfo == nil || relayInfo.OriginModelName != dto.GPTImage2Model {
+	if other == nil || relayInfo == nil || !dto.IsGPTImageSizeRoutedModel(relayInfo.OriginModelName) {
 		return
 	}
 	request, ok := relayInfo.Request.(*dto.ImageRequest)

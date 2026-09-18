@@ -163,6 +163,25 @@ describe('shared model pricing', () => {
       'gpt-image-2@4k': 0.044,
     })
   })
+
+  it('persists GPT Image 2.5 flare resolution prices under flare keys', () => {
+    const options = pricingOptions({
+      ModelPrice: '{"gpt-image-2.5-flare":0.05}',
+    })
+    const after = applyPricingDraft(options, {
+      name: 'gpt-image-2.5-flare',
+      billingMode: 'per-request',
+      price: '0.05',
+      gptImage2Price1K: '0.03',
+      gptImage2Price4K: '0.08',
+    })
+
+    expect(JSON.parse(after.ModelPrice)).toEqual({
+      'gpt-image-2.5-flare': 0.05,
+      'gpt-image-2.5-flare@1k': 0.03,
+      'gpt-image-2.5-flare@4k': 0.08,
+    })
+  })
 })
 
 it('tracks nested provider prices by model, preserves :: in model names, and ignores key order', () => {

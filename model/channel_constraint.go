@@ -100,10 +100,10 @@ func channelMatchesFilter(ch *Channel, modelName string, filter dto.ChannelFilte
 		config := ch.GetOtherSettings().AdvancedCustom
 		return config != nil && config.SupportsPathForModel(filter.RequestPath, modelName)
 	case dto.FilterImageSizeTier:
-		if modelName != relaydto.GPTImage2Model || filter.ImageSizeTier == "" {
+		if !relaydto.IsGPTImageSizeRoutedModel(modelName) || filter.ImageSizeTier == "" {
 			return true
 		}
-		return ch.GetGPTImage2UpstreamModel(filter.ImageSizeTier) != ""
+		return ch.GetGPTImageSizeUpstreamModel(modelName, filter.ImageSizeTier) != ""
 	case dto.FilterTaskPluginIdentity:
 		if ch.Type == constant.ChannelTypeTaskPlugin {
 			key := ch.GetSetting().TaskPluginKey

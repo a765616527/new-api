@@ -39,6 +39,27 @@ const emptySnapshotInput = {
 }
 
 describe('GPT Image 2 resolution pricing', () => {
+  test('attaches GPT Image 2.5 flare tier keys to the flare model', () => {
+    const snapshots = buildModelSnapshots({
+      ...emptySnapshotInput,
+      modelPrice: JSON.stringify({
+        'gpt-image-2.5-flare@1k': 0.03,
+        'gpt-image-2.5-flare@4k': 0.08,
+      }),
+    })
+
+    expect(snapshots).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'gpt-image-2.5-flare',
+          billingMode: 'per-request',
+          gptImage2Price1K: '0.03',
+          gptImage2Price4K: '0.08',
+        }),
+      ])
+    )
+  })
+
   test('keeps tier keys internal and attaches them to the public model', () => {
     const snapshots = buildModelSnapshots({
       ...emptySnapshotInput,
@@ -104,6 +125,15 @@ describe('GPT Image 2 resolution pricing', () => {
         gptImage2Price4K: '',
       })
     ).toBe(false)
+    expect(
+      needsGPTImage2FallbackPrice({
+        name: 'gpt-image-2.5-flare',
+        price: '',
+        gptImage2Price1K: '0.03',
+        gptImage2Price2K: '',
+        gptImage2Price4K: '0.08',
+      })
+    ).toBe(true)
   })
 
   test('previews configured tiers and marks missing tiers as fallback', () => {

@@ -113,6 +113,8 @@ export interface ChannelOtherSettings {
   upstream_model_update_last_detected_models?: string[]
   advanced_custom?: AdvancedCustomConfig
   gpt_image_2_size_models?: GPTImage2SizeModels
+  gpt_image_2_5_flare_size_models?: GPTImage2SizeModels
+  gpt_image_2_5_sunburst_size_models?: GPTImage2SizeModels
 }
 
 export interface GPTImage2SizeModels {

@@ -41,3 +41,11 @@ func TestGPTImage2SizeTierRejectsInvalidSize(t *testing.T) {
 		})
 	}
 }
+
+func TestIsGPTImageSizeRoutedModel(t *testing.T) {
+	assert.True(t, IsGPTImageSizeRoutedModel(GPTImage2Model))
+	assert.True(t, IsGPTImageSizeRoutedModel(GPTImage25FlareModel))
+	assert.True(t, IsGPTImageSizeRoutedModel(GPTImage25SunburstModel))
+	assert.False(t, IsGPTImageSizeRoutedModel("gpt-image-2.5"))
+	assert.False(t, IsGPTImageSizeRoutedModel("dall-e-3"))
+}

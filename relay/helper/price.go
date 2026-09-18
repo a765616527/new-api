@@ -90,14 +90,14 @@ func ModelPriceHelper(c *gin.Context, info *relaycommon.RelayInfo, promptTokens 
 		return modelPriceHelperTiered(c, info, billingModelName, promptTokens, meta, groupRatioInfo)
 	}
 
-	if info.OriginModelName == dto.GPTImage2Model {
+	if dto.IsGPTImageSizeRoutedModel(info.OriginModelName) {
 		if request, ok := info.Request.(*dto.ImageRequest); ok {
 			if tier, err := dto.GPTImage2SizeTier(request.Size); err == nil {
-				if tierPrice, configured := ratio_setting.GetGPTImage2TierPrice(tier); configured {
+				if tierPrice, configured := ratio_setting.GetGPTImageTierPrice(info.OriginModelName, tier); configured {
 					modelPrice = tierPrice
 					usePrice = true
-				} else if !usePrice && ratio_setting.HasAnyGPTImage2TierPrice() {
-					return hosttypes.PriceData{}, fmt.Errorf("gpt-image-2 %s price is not configured and no fixed fallback price is available", strings.ToUpper(tier))
+				} else if !usePrice && ratio_setting.HasAnyGPTImageTierPrice(info.OriginModelName) {
+					return hosttypes.PriceData{}, fmt.Errorf("%s %s price is not configured and no fixed fallback price is available", info.OriginModelName, strings.ToUpper(tier))
 				}
 			}
 		}

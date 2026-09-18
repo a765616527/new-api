@@ -1072,12 +1072,19 @@ func (channel *Channel) GetOtherSettings() dto.ChannelOtherSettings {
 }
 
 func (channel *Channel) GetGPTImage2UpstreamModel(tier string) string {
-	sizeModels := channel.GetOtherSettings().GPTImage2SizeModels
+	return channel.GetGPTImageSizeUpstreamModel(dto.GPTImage2Model, tier)
+}
+
+func (channel *Channel) GetGPTImageSizeUpstreamModel(model, tier string) string {
+	if !dto.IsGPTImageSizeRoutedModel(model) {
+		return ""
+	}
+	sizeModels := channel.GetOtherSettings().GPTImageSizeModelsFor(model)
 	if sizeModels == nil ||
 		(strings.TrimSpace(sizeModels.Model1K) == "" &&
 			strings.TrimSpace(sizeModels.Model2K) == "" &&
 			strings.TrimSpace(sizeModels.Model4K) == "") {
-		return dto.GPTImage2Model
+		return model
 	}
 	return sizeModels.ModelForTier(tier)
 }

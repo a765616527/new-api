@@ -390,6 +390,39 @@ func TestModelPriceHelperRejectsIncompleteGPTImage2TierPricesWithoutFallback(t *
 	require.EqualError(t, err, "gpt-image-2 2K price is not configured and no fixed fallback price is available")
 }
 
+func TestModelPriceHelperUsesGPTImage25FlareTierPrice(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	savedModelPrices := ratio_setting.ModelPrice2JSONString()
+	t.Cleanup(func() {
+		require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(savedModelPrices))
+	})
+
+	prices, err := common.Marshal(map[string]float64{
+		dto.GPTImage25FlareModel: 0.05,
+		ratio_setting.GPTImageTierPriceKey(dto.GPTImage25FlareModel, dto.ImageSizeTier1K): 0.03,
+		ratio_setting.GPTImageTierPriceKey(dto.GPTImage25FlareModel, dto.ImageSizeTier4K): 0.08,
+	})
+	require.NoError(t, err)
+	require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(string(prices)))
+
+	ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+	ctx.Set("group", "default")
+	count := uint(1)
+	request := &dto.ImageRequest{Model: dto.GPTImage25FlareModel, Size: "1024x1024", N: &count}
+	info := &relaycommon.RelayInfo{
+		OriginModelName: dto.GPTImage25FlareModel,
+		UserGroup:       "default",
+		UsingGroup:      "default",
+		Request:         request,
+	}
+
+	priceData, err := ModelPriceHelper(ctx, info, 0, request.GetTokenCountMeta())
+
+	require.NoError(t, err)
+	require.True(t, priceData.UsePrice)
+	require.Equal(t, 0.03, priceData.ModelPrice)
+}
+
 // Pricing identity is resolved once in ModelPriceHelper via the candidate
 // ladder: raw name (only when it has no @ modifiers) → canonical
 // base@effort:E@thinking:S → base@thinking:S → base. Each level is looked up

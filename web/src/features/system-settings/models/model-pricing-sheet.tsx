@@ -95,7 +95,7 @@ import { useSystemConfigStore } from '@/stores/system-config-store'
 import {
   EMPTY_LANE_ENABLED,
   EMPTY_LANE_PRICES,
-  GPT_IMAGE_2_MODEL,
+  isGPTImageSizeRoutedModel,
   buildPreviewRows,
   createInitialLaneState,
   createModelPricingSchema,
@@ -1175,7 +1175,7 @@ export const ModelPricingEditorPanel = forwardRef<
                             </FormItem>
                           )}
                         />
-                        {watchedValues.name === GPT_IMAGE_2_MODEL && (
+                        {isGPTImageSizeRoutedModel(watchedValues.name) && (
                           <Field>
                             <FieldLabel>
                               {t('GPT Image 2 resolution prices')}

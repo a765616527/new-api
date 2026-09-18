@@ -22,8 +22,8 @@ import { combineBillingExpr } from '@/features/pricing/lib/billing-expr'
 import { splitPluginBillingExprKey } from '@/features/pricing/lib/plugin-pricing'
 import type { PricingModel } from '@/features/pricing/types'
 import {
-  GPT_IMAGE_2_MODEL,
-  GPT_IMAGE_2_TIER_PRICE_KEYS,
+  gptImageTierPriceKeys,
+  isGPTImageSizeRoutedModel,
   type ModelRatioData,
 } from '@/features/system-settings/models/model-pricing-core'
 import {
@@ -254,24 +254,28 @@ export function applyPricingDraft(
       ? applyPricingValues(next, values, [data.name])
       : next
   }
-  if (!names.includes(GPT_IMAGE_2_MODEL)) return updated
+  const routedNames = names.filter((name) => isGPTImageSizeRoutedModel(name))
+  if (routedNames.length === 0) return updated
 
   const priceMap = JSON.parse(updated.ModelPrice) as Record<string, number>
-  for (const key of Object.values(GPT_IMAGE_2_TIER_PRICE_KEYS)) {
-    delete priceMap[key]
-  }
-  for (const [field, key] of [
-    ['gptImage2Price1K', GPT_IMAGE_2_TIER_PRICE_KEYS.price1K],
-    ['gptImage2Price2K', GPT_IMAGE_2_TIER_PRICE_KEYS.price2K],
-    ['gptImage2Price4K', GPT_IMAGE_2_TIER_PRICE_KEYS.price4K],
-  ] as const) {
-    const value = data[field]
-    if (value === undefined || value === '') continue
-    const number = Number(value)
-    if (!Number.isFinite(number) || number < 0) {
-      throw new Error(t('Enter a finite, non-negative price'))
+  for (const name of routedNames) {
+    const keys = gptImageTierPriceKeys(name)
+    for (const key of Object.values(keys)) {
+      delete priceMap[key]
     }
-    priceMap[key] = number
+    for (const [field, key] of [
+      ['gptImage2Price1K', keys.price1K],
+      ['gptImage2Price2K', keys.price2K],
+      ['gptImage2Price4K', keys.price4K],
+    ] as const) {
+      const value = data[field]
+      if (value === undefined || value === '') continue
+      const number = Number(value)
+      if (!Number.isFinite(number) || number < 0) {
+        throw new Error(t('Enter a finite, non-negative price'))
+      }
+      priceMap[key] = number
+    }
   }
   updated.ModelPrice = JSON.stringify(priceMap)
   return updated

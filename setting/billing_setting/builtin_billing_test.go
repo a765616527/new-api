@@ -154,4 +154,12 @@ func TestImageModelBuiltinPricesAndOverrides(t *testing.T) {
 		require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(`{"gpt-image-2@1k":0.01}`))
 		assert.Equal(t, "ratio", billing_setting.GetBillingMode("gpt-image-2"))
 	})
+
+	t.Run("gpt-image-2.5 flare resolution prices override builtin expr", func(t *testing.T) {
+		*settings = billing_setting.BillingSetting{BillingMode: map[string]string{}, BillingExpr: map[string]string{}}
+		require.NoError(t, ratio_setting.UpdateModelRatioByJSONString(`{}`))
+		require.NoError(t, ratio_setting.UpdateModelPriceByJSONString(`{"gpt-image-2.5-flare@2k":0.05}`))
+		assert.Equal(t, "ratio", billing_setting.GetBillingMode("gpt-image-2.5-flare"))
+		assert.Equal(t, "tiered_expr", billing_setting.GetBillingMode("gpt-image-2.5-sunburst"))
+	})
 }

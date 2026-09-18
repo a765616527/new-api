@@ -58,8 +58,8 @@ import { useMediaQuery } from '@/hooks'
 
 import { safeJsonParse } from '../utils/json-parser'
 import {
-  GPT_IMAGE_2_MODEL,
-  GPT_IMAGE_2_TIER_PRICE_KEYS,
+  gptImageTierPriceKeys,
+  isGPTImageSizeRoutedModel,
   type PricingMode,
 } from './model-pricing-core'
 import {
@@ -458,8 +458,8 @@ const ModelRatioVisualEditorComponent = forwardRef<
         JSON.stringify(pluginExprMap)
       )
 
-      if (name === GPT_IMAGE_2_MODEL) {
-        Object.values(GPT_IMAGE_2_TIER_PRICE_KEYS).forEach((key) => {
+      if (isGPTImageSizeRoutedModel(name)) {
+        Object.values(gptImageTierPriceKeys(name)).forEach((key) => {
           delete priceMap[key]
         })
       }
