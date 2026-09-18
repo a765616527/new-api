@@ -89,6 +89,7 @@
     "{{method}} {{route}}": "{{method}} {{route}}",
     "{{modality}} not supported": "不支持 {{modality}}",
     "{{modality}} supported": "支持 {{modality}}",
+    "{{model}} resolution prices": "{{model}} 分辨率价格",
     "{{n}} model(s) selected": "已选 {{n}} 个模型",
     "{{operation}} (ID: {{id}})": "{{operation}}（ID: {{id}}）",
     "{{processed}} of {{total}} log entries processed.": "已处理 {{processed}} / {{total}} 条日志。",

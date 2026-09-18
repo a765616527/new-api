@@ -138,6 +138,12 @@ type GPTImage2SizeModels struct {
 	Model4K string `json:"4k,omitempty"`
 }
 
+func (m *GPTImage2SizeModels) HasAny() bool {
+	return m.ModelForTier(ImageSizeTier1K) != "" ||
+		m.ModelForTier(ImageSizeTier2K) != "" ||
+		m.ModelForTier(ImageSizeTier4K) != ""
+}
+
 func (m *GPTImage2SizeModels) ModelForTier(tier string) string {
 	if m == nil {
 		return ""

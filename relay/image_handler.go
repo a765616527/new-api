@@ -214,5 +214,5 @@ func mappedImagePassThroughJSONBody(c *gin.Context, upstreamModel string) ([]byt
 	if err != nil {
 		return nil, err
 	}
-	return relaycommon.ApplyParamOverride(requestData, map[string]interface{}{"model": upstreamModel}, nil)
+	return relaycommon.ApplyParamOverride(requestData, map[string]any{"model": upstreamModel}, nil)
 }

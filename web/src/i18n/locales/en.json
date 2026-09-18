@@ -89,6 +89,7 @@
     "{{method}} {{route}}": "{{method}} {{route}}",
     "{{modality}} not supported": "{{modality}} not supported",
     "{{modality}} supported": "{{modality}} supported",
+    "{{model}} resolution prices": "{{model}} resolution prices",
     "{{n}} model(s) selected": "{{n}} model(s) selected",
     "{{operation}} (ID: {{id}})": "{{operation}} (ID: {{id}})",
     "{{processed}} of {{total}} log entries processed.": "{{processed}} of {{total}} log entries processed.",

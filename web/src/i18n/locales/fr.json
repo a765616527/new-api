@@ -89,6 +89,7 @@
     "{{method}} {{route}}": "{{method}} {{route}}",
     "{{modality}} not supported": "{{modality}} non pris en charge",
     "{{modality}} supported": "{{modality}} pris en charge",
+    "{{model}} resolution prices": "Prix par résolution {{model}}",
     "{{n}} model(s) selected": "{{n}} modèle(s) sélectionné(s)",
     "{{operation}} (ID: {{id}})": "{{operation}} (ID : {{id}})",
     "{{processed}} of {{total}} log entries processed.": "{{processed}} sur {{total}} entrées de journal traitées.",

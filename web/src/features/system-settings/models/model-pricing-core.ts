@@ -303,21 +303,21 @@ export function buildPreviewRows(
     if (isGPTImageSizeRoutedModel(values.name)) {
       rows.push(
         {
-          key: 'gpt-image-2-1k',
+          key: `${values.name}-1k`,
           label: t('1K price'),
           value: values.gptImage2Price1K
             ? `$${values.gptImage2Price1K}`
             : t('Fallback'),
         },
         {
-          key: 'gpt-image-2-2k',
+          key: `${values.name}-2k`,
           label: t('2K price'),
           value: values.gptImage2Price2K
             ? `$${values.gptImage2Price2K}`
             : t('Fallback'),
         },
         {
-          key: 'gpt-image-2-4k',
+          key: `${values.name}-4k`,
           label: t('4K price'),
           value: values.gptImage2Price4K
             ? `$${values.gptImage2Price4K}`

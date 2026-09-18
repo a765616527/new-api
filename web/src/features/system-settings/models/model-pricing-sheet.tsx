@@ -1178,7 +1178,9 @@ export const ModelPricingEditorPanel = forwardRef<
                         {isGPTImageSizeRoutedModel(watchedValues.name) && (
                           <Field>
                             <FieldLabel>
-                              {t('GPT Image 2 resolution prices')}
+                              {t('{{model}} resolution prices', {
+                                model: watchedValues.name,
+                              })}
                             </FieldLabel>
                             <FieldDescription>
                               {t(

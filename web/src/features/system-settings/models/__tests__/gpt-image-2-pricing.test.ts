@@ -162,4 +162,30 @@ describe('GPT Image 2 resolution pricing', () => {
       ])
     )
   })
+
+  test('uses the edited model name in preview row keys', () => {
+    const rows = buildPreviewRows(
+      {
+        name: 'gpt-image-2.5-sunburst',
+        price: '0.04',
+        gptImage2Price1K: '0.04',
+      },
+      'per-request',
+      '',
+      '',
+      '',
+      EMPTY_LANE_PRICES,
+      EMPTY_LANE_ENABLED,
+      (key) => key
+    )
+
+    expect(rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: 'gpt-image-2.5-sunburst-1k',
+          value: '$0.04',
+        }),
+      ])
+    )
+  })
 })

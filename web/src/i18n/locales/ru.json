@@ -89,6 +89,7 @@
     "{{method}} {{route}}": "{{method}} {{route}}",
     "{{modality}} not supported": "{{modality}} не поддерживается",
     "{{modality}} supported": "{{modality}} поддерживается",
+    "{{model}} resolution prices": "Цены {{model}} по разрешению",
     "{{n}} model(s) selected": "Выбрано моделей: {{n}}",
     "{{operation}} (ID: {{id}})": "{{operation}} (ID: {{id}})",
     "{{processed}} of {{total}} log entries processed.": "Обработано {{processed}} из {{total}} записей журнала.",

@@ -7,6 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/relaykit/dto"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -58,4 +61,28 @@ func TestGetModelRequestClassifiesGPTImage25FlareSize(t *testing.T) {
 	assert.True(t, shouldSelect)
 	assert.Equal(t, dto.GPTImage25FlareModel, request.Model)
 	assert.Equal(t, dto.ImageSizeTier2K, request.Size)
+}
+
+func TestSetupContextOmitsSizeMappedModelWhenRoutingUnset(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	channel := &model.Channel{Key: "sk-test", OtherSettings: `{}`}
+
+	_ = SetupContextForSelectedChannel(c, channel, dto.GPTImage25FlareModel)
+
+	assert.Empty(t, common.GetContextKeyString(c, constant.ContextKeyChannelSizeMappedModel))
+}
+
+func TestSetupContextSetsSizeMappedModelWhenRoutingConfigured(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	common.SetContextKey(c, constant.ContextKeyImageSizeTier, dto.ImageSizeTier1K)
+	channel := &model.Channel{
+		Key:           "sk-test",
+		OtherSettings: `{"gpt_image_2_5_flare_size_models":{"1k":"flare-1k"}}`,
+	}
+
+	_ = SetupContextForSelectedChannel(c, channel, dto.GPTImage25FlareModel)
+
+	assert.Equal(t, "flare-1k", common.GetContextKeyString(c, constant.ContextKeyChannelSizeMappedModel))
 }

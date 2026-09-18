@@ -49,3 +49,9 @@ func TestIsGPTImageSizeRoutedModel(t *testing.T) {
 	assert.False(t, IsGPTImageSizeRoutedModel("gpt-image-2.5"))
 	assert.False(t, IsGPTImageSizeRoutedModel("dall-e-3"))
 }
+
+func TestGPTImage2SizeModelsHasAny(t *testing.T) {
+	assert.False(t, (*GPTImage2SizeModels)(nil).HasAny())
+	assert.False(t, (&GPTImage2SizeModels{}).HasAny())
+	assert.True(t, (&GPTImage2SizeModels{Model2K: "vendor-2k"}).HasAny())
+}

@@ -89,6 +89,7 @@
     "{{method}} {{route}}": "{{method}} {{route}}",
     "{{modality}} not supported": "{{modality}} はサポートされていません",
     "{{modality}} supported": "{{modality}} をサポート",
+    "{{model}} resolution prices": "{{model}} の解像度価格",
     "{{n}} model(s) selected": "{{n}} 件のモデルを選択済み",
     "{{operation}} (ID: {{id}})": "{{operation}}（ID: {{id}}）",
     "{{processed}} of {{total}} log entries processed.": "{{total}} 件中 {{processed}} 件のログを処理しました。",

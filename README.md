@@ -169,15 +169,15 @@ docker-compose up -d
 <summary><strong>使用 Docker 命令</strong></summary>
 
 ```bash
-# 拉取最新镜像
-docker pull calciumion/new-api:latest
+# 拉取本分支镜像
+docker pull arxuan123/new-api:latest
 
 # 使用 SQLite（默认）
 docker run --name new-api -d --restart always \
   -p 3000:3000 \
   -e TZ=Asia/Shanghai \
   -v ./data:/data \
-  calciumion/new-api:latest
+  arxuan123/new-api:latest
 
 # 使用 MySQL
 docker run --name new-api -d --restart always \
@@ -185,7 +185,7 @@ docker run --name new-api -d --restart always \
   -e SQL_DSN="root:123456@tcp(localhost:3306)/oneapi" \
   -e TZ=Asia/Shanghai \
   -v ./data:/data \
-  calciumion/new-api:latest
+  arxuan123/new-api:latest
 ```
 
 > **💡 提示：** `-v ./data:/data` 会将数据保存在当前目录的 `data` 文件夹中，你也可以改为绝对路径如 `-v /your/custom/path:/data`
@@ -517,6 +517,10 @@ Token、Origin 校验和 PAT 契约见[用户鉴权与登录会话](./docs/authe
 ## 📜 许可证
 
 本项目采用 [GNU Affero 通用公共许可证 v3.0 (AGPLv3)](./LICENSE) 授权。
+
+AGPLv3 第 7 条附加条款适用。修改版本必须在适当的法律声明以及用户界面中显著的关于、法律、页脚或署名位置保留作者署名：`Frontend design and development by New API contributors.`
+
+提供用户界面的修改版本还必须保留指向原项目的可见链接：<https://github.com/QuantumNous/new-api>。
 
 本项目为开源项目，在 [One API](https://github.com/songquanpeng/one-api)（MIT 许可证）的基础上进行二次开发。
 

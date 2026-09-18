@@ -100,7 +100,7 @@ describe('GPT Image 2 request log details', () => {
         image_size: '1536x1024',
         image_size_tier: '2K',
         image_quality: 'high',
-        image_count: 2,
+        image_request_count: 2,
         image_unit_price: 0.04,
       }),
       request_id: 'request-id',

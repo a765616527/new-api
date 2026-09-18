@@ -89,6 +89,7 @@
     "{{method}} {{route}}": "{{method}} {{route}}",
     "{{modality}} not supported": "Không hỗ trợ {{modality}}",
     "{{modality}} supported": "Hỗ trợ {{modality}}",
+    "{{model}} resolution prices": "Giá theo độ phân giải {{model}}",
     "{{n}} model(s) selected": "Đã chọn {{n}} model",
     "{{operation}} (ID: {{id}})": "{{operation}} (ID: {{id}})",
     "{{processed}} of {{total}} log entries processed.": "Đã xử lý {{processed}}/{{total}} mục nhật ký.",

@@ -89,7 +89,12 @@ func appendGPTImage2RequestInfo(other *model.LogOther, relayInfo *relaycommon.Re
 
 	other.SetPublic("image_size", size)
 	other.SetPublic("image_quality", quality)
-	other.SetPublic("image_count", count)
+	other.SetPublic("image_request_count", count)
+	if relayInfo.PriceData.UsePrice {
+		if _, exists := other.Snapshot()["image_count"]; !exists {
+			other.SetPublic("image_count", count)
+		}
+	}
 	if tier, err := dto.GPTImage2SizeTier(request.Size); err == nil {
 		other.SetPublic("image_size_tier", strings.ToUpper(tier))
 		if relayInfo.PriceData.UsePrice {

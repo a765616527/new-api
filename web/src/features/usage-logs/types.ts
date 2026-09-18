@@ -193,6 +193,7 @@ export interface LogOtherData {
   image_size_tier?: string
   image_quality?: string
   image_count?: number
+  image_request_count?: number
   image_unit_price?: number
   group_ratio?: number
   user_group_ratio?: number

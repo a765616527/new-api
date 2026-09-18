@@ -632,7 +632,8 @@ func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, mode
 	common.SetContextKey(c, constant.ContextKeyChannelAutoBan, channel.GetAutoBan())
 	common.SetContextKey(c, constant.ContextKeyChannelModelMapping, channel.GetModelMapping())
 	common.SetContextKey(c, constant.ContextKeyChannelSizeMappedModel, "")
-	if dto.IsGPTImageSizeRoutedModel(modelName) {
+	if dto.IsGPTImageSizeRoutedModel(modelName) &&
+		channel.GetOtherSettings().GPTImageSizeModelsFor(modelName).HasAny() {
 		tier := common.GetContextKeyString(c, constant.ContextKeyImageSizeTier)
 		common.SetContextKey(c, constant.ContextKeyChannelSizeMappedModel, channel.GetGPTImageSizeUpstreamModel(modelName, tier))
 	}

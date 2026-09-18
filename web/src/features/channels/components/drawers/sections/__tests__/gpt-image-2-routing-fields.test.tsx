@@ -28,7 +28,7 @@ import {
 } from '../../../../lib/channel-form'
 import { GPTImage2RoutingFields } from '../gpt-image-2-routing-fields'
 
-function Harness(props: { disabled?: boolean }) {
+function Harness(props: { disabled?: boolean; models?: string[] }) {
   const form = useForm<ChannelFormValues>({
     defaultValues: CHANNEL_FORM_DEFAULT_VALUES,
   })
@@ -38,6 +38,7 @@ function Harness(props: { disabled?: boolean }) {
       <GPTImage2RoutingFields
         control={form.control}
         disabled={props.disabled === true}
+        models={props.models}
       />
     </Form>
   )
@@ -74,5 +75,19 @@ describe('GPT Image 2 resolution routing fields', () => {
     for (const input of screen.getAllByRole('textbox')) {
       expect(input).toBeDisabled()
     }
+  })
+
+  test('shows flare and sunburst routing when those models are selected', () => {
+    render(
+      <Harness models={['gpt-image-2.5-flare', 'gpt-image-2.5-sunburst']} />
+    )
+
+    expect(
+      screen.getByText('GPT Image 2.5 Flare Resolution Routing')
+    ).toBeVisible()
+    expect(
+      screen.getByText('GPT Image 2.5 Sunburst Resolution Routing')
+    ).toBeVisible()
+    expect(screen.getAllByRole('textbox')).toHaveLength(6)
   })
 })

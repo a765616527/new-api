@@ -483,10 +483,11 @@ function ImageRequestBreakdown(props: { other: LogOtherData }) {
   if (other.image_quality) {
     rows.push({ label: t('Requested Quality'), value: other.image_quality })
   }
-  if (other.image_count != null) {
+  const requestCount = other.image_request_count ?? other.image_count
+  if (requestCount != null) {
     rows.push({
       label: t('Image Count'),
-      value: other.image_count.toLocaleString(),
+      value: requestCount.toLocaleString(),
     })
   }
   if (other.image_unit_price != null) {

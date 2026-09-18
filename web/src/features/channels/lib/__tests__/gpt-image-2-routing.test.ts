@@ -88,4 +88,31 @@ describe('GPT Image 2 channel routing settings', () => {
       gpt_image_2_5_sunburst_size_models: { '4k': 'sunburst-4k' },
     })
   })
+
+  test('restores GPT Image 2.5 flare and sunburst tiers when editing a channel', () => {
+    const channel = {
+      ...CHANNEL_FORM_DEFAULT_VALUES,
+      id: 8,
+      created_time: 0,
+      test_time: 0,
+      response_time: 0,
+      balance: 0,
+      balance_updated_time: 0,
+      used_quota: 0,
+      group: 'default',
+      channel_info: {
+        is_multi_key: false,
+        multi_key_size: 0,
+        multi_key_polling_index: 0,
+        multi_key_mode: 'random',
+      },
+      settings:
+        '{"gpt_image_2_5_flare_size_models":{"1k":"flare-1k"},"gpt_image_2_5_sunburst_size_models":{"4k":"sunburst-4k"}}',
+    } as Channel
+
+    const defaults = transformChannelToFormDefaults(channel)
+
+    expect(defaults.gpt_image_2_5_flare_model_1k).toBe('flare-1k')
+    expect(defaults.gpt_image_2_5_sunburst_model_4k).toBe('sunburst-4k')
+  })
 })
