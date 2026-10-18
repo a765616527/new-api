@@ -254,6 +254,7 @@
     "Active Cache Count": "活跃缓存数",
     "Active Files": "活跃文件",
     "Active models": "活跃模型",
+    "Active requests": "当前并发",
     "Active Tasks": "进行中任务",
     "active users": "活跃用户",
     "Active version": "激活版本",

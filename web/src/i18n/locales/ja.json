@@ -254,6 +254,7 @@
     "Active Cache Count": "アクティブキャッシュ数",
     "Active Files": "アクティブファイル",
     "Active models": "アクティブなモデル",
+    "Active requests": "処理中のリクエスト",
     "Active Tasks": "進行中のタスク",
     "active users": "アクティブユーザー",
     "Active version": "有効なバージョン",

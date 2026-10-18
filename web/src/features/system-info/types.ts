@@ -60,6 +60,10 @@ export type SystemInstanceInfo = {
     }
     [key: string]: unknown
   }
+  http?: {
+    active_connections?: number
+    [key: string]: unknown
+  }
   [key: string]: unknown
 }
 

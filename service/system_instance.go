@@ -27,6 +27,7 @@ type SystemInstanceInfo struct {
 	Runtime       SystemInstanceRuntimeInfo `json:"runtime"`
 	Host          SystemInstanceHostInfo    `json:"host"`
 	Resources     SystemInstanceResources   `json:"resources"`
+	HTTP          SystemInstanceHTTPStats   `json:"http"`
 	Extra         map[string]any            `json:"extra,omitempty"`
 }
 
@@ -43,6 +44,11 @@ type SystemInstanceRuntimeInfo struct {
 
 type SystemInstanceHostInfo struct {
 	Hostname string `json:"hostname"`
+}
+
+// SystemInstanceHTTPStats is a snapshot taken at heartbeat time.
+type SystemInstanceHTTPStats struct {
+	ActiveConnections int64 `json:"active_connections"`
 }
 
 type SystemInstanceResources struct {
@@ -118,6 +124,9 @@ func ReportCurrentSystemInstance() error {
 				FreeBytes:   diskInfo.Free,
 				UsedPercent: diskInfo.UsedPercent,
 			},
+		},
+		HTTP: SystemInstanceHTTPStats{
+			ActiveConnections: common.GetActiveConnections(),
 		},
 	}
 	return model.UpsertSystemInstance(identity.Name, info, common.StartTime, common.GetTimestamp())

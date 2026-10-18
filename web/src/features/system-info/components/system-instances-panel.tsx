@@ -56,7 +56,11 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { toIntlLocale } from '@/i18n/languages'
-import { formatTimestampRelative, formatTimestampToDate } from '@/lib/format'
+import {
+  formatNumber,
+  formatTimestampRelative,
+  formatTimestampToDate,
+} from '@/lib/format'
 import { handleServerError } from '@/lib/handle-server-error'
 import { createServerError } from '@/lib/server-error-message'
 import { cn } from '@/lib/utils'
@@ -239,7 +243,7 @@ function SystemInstancesList(props: SystemInstancesTableProps) {
 
   return (
     <div className='overflow-x-auto rounded-md border'>
-      <Table className='min-w-[1230px]'>
+      <Table className='min-w-[1340px]'>
         <TableHeader>
           <TableRow className='bg-muted/40 hover:bg-muted/40'>
             <TableHead className='h-9 min-w-[240px] px-4 text-xs'>
@@ -255,6 +259,9 @@ function SystemInstancesList(props: SystemInstancesTableProps) {
             </TableHead>
             <TableHead className='h-9 w-[96px] text-xs'>
               {t('Storage')}
+            </TableHead>
+            <TableHead className='h-9 w-[110px] text-xs'>
+              {t('Active requests')}
             </TableHead>
             <TableHead className='h-9 w-[100px] text-xs'>
               {t('Version')}
@@ -419,6 +426,14 @@ function SystemInstancesList(props: SystemInstancesTableProps) {
                       ) : undefined
                     }
                   />
+                </TableCell>
+                <TableCell className='py-2.5 align-middle'>
+                  <span className='font-mono text-xs tabular-nums'>
+                    {formatNumber(
+                      instance.info?.http?.active_connections,
+                      toIntlLocale(i18n.language)
+                    )}
+                  </span>
                 </TableCell>
                 <TableCell className='py-2.5 align-middle'>
                   <div className='truncate font-mono text-xs'>
